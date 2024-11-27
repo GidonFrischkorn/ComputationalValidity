@@ -2,18 +2,18 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 100
+nReplications <- 500
 
 Design <- createDesign(
   sample_size = c(25,50,100),
-  nTrials = c(50,100,250,500)
+  nTrials = c(50,100,200)
 )
 
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(1.5, .4, 0.15,0.001, 0.02, 0.015, 10.00),
-          c(5.0, .8, 0.50,0.010, 0.12, 0.400, 10.01))
+    rbind(c(1.5, .4, 0.15,0.001, 0.02, 0.015, 500.00),
+          c(5.0, .8, 0.50,0.010, 0.12, 0.400, 500.01))
   )
 )
 colnames(par_limits) <- c("min", "max")
@@ -41,12 +41,12 @@ Analyse <- function(condition, dat, fixed_objects) {
 
 ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
-# the summary will be done seperately to give us more flexibility
+# the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
 }
 
 # run simulation if there have been no results saved
-if(!file.exists(here::here("output","res_DMC_simulation.rds")) |
+if (!file.exists(here::here("output","res_DMC_simulation.rds")) |
    !dir.exists(here::here("output","SimResults_DMC"))) {
   res <- runSimulation(design = Design, replications = nReplications,
                        generate = Generate, analyse = Analyse, summarise = Summarise,

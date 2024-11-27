@@ -98,14 +98,14 @@ avg_effects_behavior <- df_behavior_all %>%
 
 ggplot(data = avg_effects_behavior %>% filter (indicator %in% c("comp", "incomp")),
        aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid( ~ measure) +
+  facet_grid(SampleSize ~ measure) +
   geom_boxplot() +
   labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
   clean_plot
 
 ggplot(data = df_behavior_all %>% filter(indicator == "diff"),
        aes(x = value, fill = as.factor(nTrials))) +
-  facet_grid(~ measure) +
+  facet_grid(SampleSize~ measure) +
   geom_density(alpha = 0.3)
 
 avg_effects_ezDM <- df_ezDM_all %>%
@@ -114,7 +114,7 @@ avg_effects_ezDM <- df_ezDM_all %>%
 
 ggplot(data = avg_effects_ezDM %>% filter (indicator %in% c("comp", "incomp")),
        aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid( ~ measure) +
+  facet_grid(SampleSize ~ measure) +
   geom_boxplot() +
   labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
   clean_plot
