@@ -1,0 +1,39 @@
+---
+title: "Establishing validity from a computational modeling perspective"
+subtitle: "An example focussing on inhibition."
+author: "Gidon T. Frischkorn, Ricardo Rebmann, & Klaus Oberauer"
+format: html
+editor: visual
+bibliography: references.json
+---
+
+## Establishing validity from a computational modeling perspective: An example focusing on inhibition
+
+Following commonly used definitions of validity and propositions of validity researchers, establishing the validity of a newly developed measure or test requires its integration in the nomological network of psychological constructs [@cronbachConstructValidityPsychological1955] and providing sufficient evidence for its interpretation and practical use [@messickValidity1987]
+
+## Conflating theoretical with psychometrics questions
+
+## Computational Models implement how processes cause changes in observed behavior
+
+## Validity from a computational modeling perspective
+
+### Identifying suitable compuational models
+
+### 
+
+## Identifying valid behavioral performance measures for inhibition processes
+
+Here we focus on computational models for traditional inhibition tasks such as the Stroop [@stroopStudiesInterferenceSerial1935], Flanker [@eriksenEffectsNoiseLetters1974], or Simon [@simonEffectCompatibilitySR1981] task. These are particularly relevant as the traditional indicator for inhibition from these tasks - that is the difference of reaction times from correct responses between incongruent and congruent conditions- has been criticized for its bad psychometric properties [@draheimReactionTimeDifferential2019; @vonbastianAdvancingUnderstandingIndividual2020]. The main point of criticism was that reaction times are affected by speed-accuracy trade offs and tend to be unreliable, in particular when considering experimental effect measures.
+
+### Simulation I: Diffusion Model for Conflict Tasks
+
+
+
+```{r}
+
+```
+
+
+### Simulation II: Shrinking Spotlight Model of Attention
+
+## 

@@ -1,0 +1,37 @@
+Package: ComputationalValidity
+Type: Package
+Title: This pacakge implements simulations to illustrate how validity can be
+  assessed when there are formal models describing the processes underlying 
+  behavioral performance.
+Version: 0.1.0
+Author: Gidon T. Frischkorn
+Maintainer: Gidon T. Frischkorn <gidon.frischkorn@psychologie.uzh.ch>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 4.1),
+    data.table,
+    tidytable
+Suggests: 
+    testthat (>= 3.0.0),
+    usethis,
+    knitr,
+    rmarkdown,
+    bookdown,
+    ggplot2,
+    ggthemes,
+    patchwork,
+    remotes
+Imports: 
+    magrittr,
+    dRiftDM,
+    data.table,
+    tidytable,
+    stringr,
+    ggplot2,
+    here
+VignetteBuilder: knitr
