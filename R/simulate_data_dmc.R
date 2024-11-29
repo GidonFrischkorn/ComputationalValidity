@@ -42,6 +42,8 @@ simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
     verbose = verbose
   )
 
+  sim_data$task = 1
+
   # collect information in list
   data_list <- list(
     sub_parms = data.table::data.table(sub_parms),

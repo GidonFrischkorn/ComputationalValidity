@@ -11,7 +11,7 @@ get_ezDM_dmc <- function(data, format = "long") {
     summarize(v = ez_dm(RT = RT, ACC = 1 - Error, robust = TRUE)["v"],
               a = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["a"],
               t0 = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["t0"],
-              .by = c(ID,Cond)) %>%
+              .by = c(ID,Cond,task)) %>%
     pivot_longer(cols = c("v","a","t0"),
                  names_to = "measure") %>%
     pivot_wider(names_from = c("Cond"),

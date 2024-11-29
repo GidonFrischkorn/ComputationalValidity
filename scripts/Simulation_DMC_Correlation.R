@@ -5,8 +5,10 @@ library(ComputationalValidity)
 nReplications <- 500
 
 Design <- createDesign(
-  sample_size = c(25,50,100),
-  nTrials = c(50,100,200)
+  sample_size = c(100),
+  nTrials = c(50,100,200),
+  correlation = "random",
+  correlated_par = c("muc","A","tau")
 )
 
 # set parameter limits
@@ -28,14 +30,21 @@ Generate <- function(condition, fixed_objects = NULL) {
     par_limits <- NULL
   }
 
-  dat <- simulate_data_dmc(n_sub = sample_size, n_trials = nTrials)
+  if (correlation == "random") {
+    correlation_Z = runif(1, psych::fisherz(0), psych::fisherz(0.9))
+    correlation = psych::fisherz2r(correlation_Z)
+  }
+
+  dat <- simulate_correlation_dmc(n_sub = sample_size, n_trials = nTrials,
+                                  correlation = correlation, correlated_par = correlated_par,
+                                  par_limits = par_limits)
   dat
 }
 
 dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
-  ret <- analyze_data(dat)
+  ret <- analyze_correlation(dat)
   ret
 }
 
@@ -46,19 +55,20 @@ Summarise <- function(condition, results, fixed_objects) {
 }
 
 # run simulation if there have been no results saved
-if (!file.exists(here::here("output","res_DMC_simulation.rds")) |
-   !dir.exists(here::here("output","SimResults_DMC"))) {
+if (!file.exists(here::here("output","res_DMC_correlation.rds")) |
+   !dir.exists(here::here("output","Simulation_DMC_Correlations"))) {
   res <- runSimulation(design = Design, replications = nReplications,
                        generate = Generate, analyse = Analyse, summarise = Summarise,
                        fixed_objects = list(par_limits = par_limits),
                        save_details = list(
                          safe = TRUE,
                          out_rootdir = here::here(),
-                         save_results_dirname = "output/SimResults_DMC"),
+                         save_results_dirname = "output/Simulation_DMC_Correlations",
+                         save_results_filename = "DMC_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = parallel::detectCores()/2,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
-  save(res, file = here::here("output","res_DMC_simulation.rds"))
+  save(res, file = here::here("output","res_DMC_correlation.rds"))
 }
