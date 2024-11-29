@@ -4,7 +4,7 @@ graphics.off()  # switch off graphics device
 
 # use relative paths to load & save data
 pacman::p_load(here,SimDesign,tidytable,data.table, ggplot2)
-nReplications <- 50
+nReplications <- 500
 
 ## Collect Results -------------------------------------------------------------
 load(here("output","res_DMC_simulation.rds"))
@@ -140,8 +140,6 @@ avg_effects_all <- rbind(avg_effects_behavior,avg_effects_ezDM)
 df_reliability_all <- df_reliability_all %>%
   left_join(avg_effects_all)
 
-
-
 ggplot(data = df_reliability_all,
        aes(x = as.factor(nTrials), y = reliability, fill = as.factor(SampleSize))) +
   facet_grid(indicator ~ measure) +
@@ -151,9 +149,20 @@ ggplot(data = df_reliability_all,
   clean_plot
 
 ggplot(data = df_reliability_all %>% filter(indicator == "diff"),
+       aes(x = mean, y = reliability, color = as.factor(SampleSize))) +
+  facet_grid(nTrials ~ measure, scales = "free") +
+  ylim(-1,1) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm") +
+  labs(x = "Standard Deviation of Conflict Effect", y = "Estimated Reliability",
+       fill = "Sample Size") +
+  clean_plot
+
+ggplot(data = df_reliability_all %>% filter(indicator == "diff"),
        aes(x = sd, y = reliability, color = as.factor(SampleSize))) +
   facet_grid(nTrials ~ measure, scales = "free") +
-  geom_point(alpha = 0.5) +
+  ylim(-1,1) +
+  geom_point(alpha = 0.3) +
   geom_smooth(method = "lm") +
   labs(x = "Standard Deviation of Conflict Effect", y = "Estimated Reliability",
        fill = "Sample Size") +
@@ -165,7 +174,7 @@ df_recovery_all <- df_recovery_all %>%
 ggplot(data = df_recovery_all %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC")),
-       aes(x = genPar, y = rec, fill = as.factor(SampleSize))) +
+       aes(x = genPar, y = rec, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
@@ -185,7 +194,7 @@ ggplot(data = df_recovery_all %>%
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
-  geom_point(alpha = 0.5) +
+  geom_point(alpha = 0.1) +
   geom_smooth(method = "lm") +
   labs(x = "Mean Conflict Effect in the Sample", y = "Recovery",
        fill = "Sample Size") +
@@ -201,7 +210,7 @@ ggplot(data = df_recovery_all %>%
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
-  geom_point(alpha = 0.5) +
+  geom_point(alpha = 0.1) +
   geom_smooth(method = "lm") +
   labs(x = "SD of Conflict Effect in the Sample", y = "Recovery",
        fill = "Sample Size") +
@@ -224,13 +233,15 @@ ggplot(data = df_recovery_all %>%
 
 ggplot(data = df_recovery_all %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
-                measure %in% c("RT","PC")),
-       aes(x = genPar, y = rec_corrected, fill = as.factor(SampleSize))) +
+                measure %in% c("RT","PC"),
+                SampleSize == 100),
+       aes(x = genPar, y = rec_corrected, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
   geom_boxplot() +
+  ylim(-1,1) +
   coord_cartesian(ylim = c(-1,1)) +
   labs(x = "Generating DMC Parameter", y = "Recovery (Corrected for Reliability)",
        fill = "Sample Size") +
@@ -238,13 +249,15 @@ ggplot(data = df_recovery_all %>%
 
 ggplot(data = df_recovery_all %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
-                measure %in% c("v","a","t0")),
-       aes(x = genPar, y = rec_corrected, fill = as.factor(SampleSize))) +
+                measure %in% c("v","a","t0"),
+                SampleSize == 100),
+       aes(x = genPar, y = rec_corrected, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
   geom_boxplot() +
+  ylim(-1,1) +
   coord_cartesian(ylim = c(-1,1)) +
   labs(x = "Generating DMC Parameter", y = "Recovery (Corrected for Reliability)",
        fill = "Sample Size") +

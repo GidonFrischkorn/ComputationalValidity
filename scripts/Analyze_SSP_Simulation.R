@@ -4,7 +4,7 @@ graphics.off()  # switch off graphics device
 
 # use relative paths to load & save data
 pacman::p_load(here,SimDesign,tidytable,data.table, ggplot2)
-nReplications <- 50
+nReplications <- 500
 
 ## Collect Results -------------------------------------------------------------
 load(here("output","res_SSP_simulation.rds"))
@@ -123,6 +123,7 @@ ggplot(data = df_reliability_all,
        aes(x = as.factor(nTrials), y = reliability, fill = as.factor(nTrials))) +
   facet_grid(indicator ~ measure) +
   geom_boxplot() +
+  ylim(-1,1) +
   labs(x = "Number of Trials in each Condition", y = "Estimated Reliability",
        fill = "Trials in each\nCondition") +
   clean_plot
@@ -162,6 +163,7 @@ ggplot(data = df_recovery_all %>%
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
   geom_boxplot() +
+  ylim(-1,1) +
   labs(x = "Generating DMC Parameter", y = "Recovery (Corrected for Reliability)",
        fill = "Trials in each\nCondition") +
   clean_plot
@@ -171,6 +173,7 @@ ggplot(data = df_recovery_all %>%
                 measure %in% c("v","a","t0")),
        aes(x = genPar, y = rec_corrected, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
+  ylim(-1,1) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
   geom_hline(yintercept = -0.3, color = "darkred", linetype = "dotted") +
