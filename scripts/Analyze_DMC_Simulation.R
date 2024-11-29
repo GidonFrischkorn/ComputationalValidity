@@ -111,7 +111,7 @@ ggplot(data = avg_effects_behavior %>% filter (indicator %in% c("diff")),
   labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
   clean_plot
 
-ggplot(data = df_behavior_all %>% filter(indicator == "diff"),
+ggplot(data = df_behavior_dmc %>% filter(indicator == "diff"),
        aes(x = value, fill = as.factor(nTrials))) +
   facet_grid(SampleSize~ measure) +
   geom_density(alpha = 0.3)
@@ -140,6 +140,9 @@ avg_effects_all <- rbind(avg_effects_behavior,avg_effects_ezDM)
 df_reliability_all <- df_reliability_all %>%
   left_join(avg_effects_all)
 
+df_recovery_all <- df_recovery_all %>%
+  left_join(avg_effects_all)
+
 ggplot(data = df_reliability_all,
        aes(x = as.factor(nTrials), y = reliability, fill = as.factor(SampleSize))) +
   facet_grid(indicator ~ measure) +
@@ -154,7 +157,7 @@ ggplot(data = df_reliability_all %>% filter(indicator == "diff"),
   ylim(-1,1) +
   geom_point(alpha = 0.3) +
   geom_smooth(method = "lm") +
-  labs(x = "Standard Deviation of Conflict Effect", y = "Estimated Reliability",
+  labs(x = "Average Conflict Effect", y = "Estimated Reliability",
        fill = "Sample Size") +
   clean_plot
 
@@ -168,8 +171,7 @@ ggplot(data = df_reliability_all %>% filter(indicator == "diff"),
        fill = "Sample Size") +
   clean_plot
 
-df_recovery_all <- df_recovery_all %>%
-  left_join(avg_effects_all)
+
 
 ggplot(data = df_recovery_all %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
