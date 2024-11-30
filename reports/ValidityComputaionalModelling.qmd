@@ -25,6 +25,7 @@ knitr::opts_chunk$set(
 ```{r}
 # use relative paths to load & save data
 pacman::p_load(here, SimDesign, tidytable, data.table, ggplot2, ComputationalValidity)
+# source(here("scripts","LoadResultsFiles.R"))
 ```
 
 ## Establishing validity from a computational modeling perspective: An example focusing on inhibition
@@ -54,27 +55,20 @@ Here we focus on computational models for traditional inhibition tasks such as t
 ```{r avg-behavioral-effects}
 dmc_effects_behavior <- dmc_recovery_behavior %>%
   summarize(mean = mean(value),
-            sd = sd(value),
-            .by = c(nRep, SampleSize, nTrials, measure, indicator))
-
-plot_conditions_behavior <- ggplot(data = dmc_effects_behavior %>% filter (indicator %in% c("comp", "incomp")),
-       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  theme_gf()
-
-plot_conflictFX_behavior <- ggplot(data = dmc_effects_behavior %>% filter (indicator %in% c("diff")),
-       aes(x = indicator, y = sd, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Average Conflict Effect", fill = "Trials in each\nCondition") +
-  theme_gf()
-
-ggsave(filename = here("figures","Plot_DMC_Conditions_Behavior.jpg"),
-       plot_conditions_behavior, dpi = 300, width = 7, height = 6)
-ggsave(filename = here("figures","Plot_DMC_ConflictFX_Behavior.jpg"),
-       plot_conflictFX_behavior, dpi = 300, width = 7, height = 6)
+            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
+  mutate(mean = case_when(measure == "RT" ~ mean * 1000,
+                          TRUE ~ mean * 100)) %>% 
+  summarize(mean = mean(mean),
+            min = min(mean),
+            max = max(mean),
+            .by = c(SampleSize, nTrials, measure, indicator)) %>% 
+  pivot_wider(names_from = measure,
+              values_from = c(mean, min, max)) %>% 
+  filter(indicator %in% c("mean","diff")) %>% 
+  arrange(indicator, SampleSize, nTrials) %>% 
+  select(indicator, SampleSize, nTrials,
+         mean_RT, min_RT, max_RT,
+         mean_PC, min_PC, max_PC)
 ```
 
 ```{r}
@@ -258,4 +252,32 @@ ggplot(data = df_recovery_dmc %>%
 
 ### Simulation II: Shrinking Spotlight Model of Attention
 
-## 
+## Appendix
+
+```{r}
+plot_dmc_effects_behavior <- dmc_effects_behavior <- dmc_recovery_behavior %>%
+  summarize(mean = mean(value),
+            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
+  mutate(mean = case_when(measure == "RT" ~ mean * 1000,
+                          TRUE ~ mean * 100))
+
+plot_conditions_behavior <- ggplot(data = plot_dmc_effects_behavior %>% filter (indicator %in% c("comp", "incomp")),
+       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
+  facet_grid(SampleSize ~ measure) +
+  geom_boxplot() +
+  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
+  theme_gf()
+
+plot_conflictFX_behavior <- ggplot(data = plot_dmc_effects_behavior %>% filter (indicator %in% c("difference")),
+       aes(y = sd, fill = nTrials)) +
+  facet_grid(SampleSize ~ measure) +
+  geom_boxplot() +
+  labs(x = "Condition", y = "Average Conflict Effect", fill = "Trials in each\nCondition") +
+  theme_gf()
+
+ggsave(filename = here("figures","Plot_DMC_Conditions_Behavior.jpg"),
+       plot_conditions_behavior, dpi = 300, width = 7, height = 6)
+ggsave(filename = here("figures","Plot_DMC_ConflictFX_Behavior.jpg"),
+       plot_conflictFX_behavior, dpi = 300, width = 7, height = 6)
+```
+

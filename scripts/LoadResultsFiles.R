@@ -12,7 +12,14 @@ ComputationalValidity_project %>%
 # Download folders
 ComputationalValidity_project %>%
   osf_ls_files(n_max = Inf, type = "folder") %>%
+  dplyr::filter(name != "data") %>%
   osf_download(path = here("output"), conflicts = "skip", verbose = FALSE)
+
+# Download folders
+ComputationalValidity_project %>%
+  osf_ls_files(n_max = Inf, type = "folder") %>%
+  dplyr::filter(name == "data") %>%
+  osf_download(path = here("data"), conflicts = "skip", verbose = FALSE)
 
 # Print short message about the files being downloaded
 print("All missing results files have been downloaded sucesfully!")
