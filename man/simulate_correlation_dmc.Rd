@@ -8,7 +8,7 @@ simulate_correlation_dmc(
   n_sub,
   n_trials,
   correlation,
-  correlated_pars,
+  correlated_par,
   par_limits = NULL,
   verbose = 0
 )
