@@ -11,23 +11,24 @@
 #'
 #' @export
 simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_par, par_limits = NULL, verbose = 0) {
+  # set up model object
+  ssp_model <- dRiftDM::ssp_dm()
+  ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
+
   # prepare lower and upper bounds for parameters
   if (is.null(par_limits)) {
     # default settings
-    lower_limits <- c(.4, 0.15, 0.001, 1, 0.5)
-    upper_limits <- c(.8, 0.50, 0.010, 4, 2)
+    lower_limits <- c(.4, 0.15, 1, 0.5, 8)
+    upper_limits <- c(.8, 0.50, 4, 2.0, 12)
   } else {
-    if (all(dRiftDM::ssp_dm()$free_prms %in% rownames(par_limits))) {
-      par_limits <- par_limits[dRiftDM::ssp_dm()$free_prms,]
+    if (all(ssp_model$free_prms %in% rownames(par_limits))) {
+      par_limits <- par_limits[ssp_model$free_prms,]
       lower_limits <- par_limits$min
       upper_limits <- par_limits$max
     } else {
       stop("par_limits does not contain limits for some paramters of the DMC.")
     }
   }
-
-  names(lower_limits) <- dRiftDM::ssp_dm()$free_prms
-  names(upper_limits) <- dRiftDM::ssp_dm()$free_prms
 
   # simulate parameters for each subject
   sub_parms_task1 = dRiftDM::simulate_values(
@@ -43,8 +44,8 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
   )
 
   # rename columns with parameter names
-  colnames(sub_parms_task1)[1:5] = dRiftDM::ssp_dm()$free_prms
-  colnames(sub_parms_task2)[1:5] = dRiftDM::ssp_dm()$free_prms
+  colnames(sub_parms_task1)[1:5] = ssp_model$free_prms
+  colnames(sub_parms_task2)[1:5] = ssp_model$free_prms
 
   if ("p" == correlated_par) {
     sub_parms_task2$p = simulate_correlated_vars(sub_parms_task1$p, correlation = correlation,
@@ -62,24 +63,29 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
                                                        lb = lower_limits["non_dec"], ub = upper_limits["non_dec"])
     observed_correlation = cor(sub_parms_task1$non_dec, sub_parms_task2$non_dec)
   } else if("sd_0" == correlated_par) {
-    sub_parms_task2$A = simulate_correlated_vars(sub_parms_task1$sd_0, correlation = correlation,
+    sub_parms_task2$sd_0 = simulate_correlated_vars(sub_parms_task1$sd_0, correlation = correlation,
                                                  mean = mean(sub_parms_task1$sd_0), sd = sd(sub_parms_task1$sd_0),
                                                  lb = lower_limits["sd_0"], ub = upper_limits["sd_0"])
     observed_correlation = cor(sub_parms_task1$sd_0, sub_parms_task2$sd_0)
+  } else if ("r" == correlated_par) {
+    sub_parms_task2$r = simulate_correlated_vars(sub_parms_task1$r, correlation = correlation,
+                                                    mean = mean(sub_parms_task1$r), sd = sd(sub_parms_task1$r),
+                                                    lb = lower_limits["r"], ub = upper_limits["r"])
+    observed_correlation = cor(sub_parms_task1$r, sub_parms_task2$r)
   } else {
     stop("No valid parameter to correlate specified. Please specify one of the following: p, b, non_dec, sd_0.")
   }
 
   # simulate data
   sim_data_task1 = dRiftDM::simulate_data(
-    drift_dm_obj = dRiftDM::ssp_dm(),
+    drift_dm_obj = ssp_model,
     n = n_trials,
     df_prms = sub_parms_task1,
     verbose = verbose
   )
 
   sim_data_task2 = dRiftDM::simulate_data(
-    drift_dm_obj = dRiftDM::ssp_dm(),
+    drift_dm_obj = ssp_model,
     n = n_trials,
     df_prms = sub_parms_task2,
     verbose = verbose

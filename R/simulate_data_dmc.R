@@ -9,14 +9,18 @@
 #'
 #' @export
 simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
+  # set up model object
+  dmc_model <- dRiftDM::dmc_dm()
+  dmc_model <- dRiftDM::set_free_prms(dmc_model, c("b", "non_dec", "p", "sd_0","r"))
+
   # prepare lower and upper bounds for parameters
   if (is.null(par_limits)) {
     # default settings
     lower_limits <- c(1.5, .4, 0.15,0.001,0.02,0.015,10)
     upper_limits <- c(5, .8, 0.5,0.01,0.12,0.40,10.01)
   } else {
-    if (all(dRiftDM::dmc_dm()$free_prms %in% rownames(par_limits))) {
-      par_limits <- par_limits[dRiftDM::dmc_dm()$free_prms,]
+    if (all(dmc_model$free_prms %in% rownames(par_limits))) {
+      par_limits <- par_limits[dmc_model$free_prms,]
       lower_limits <- par_limits$min
       upper_limits <- par_limits$max
     } else {

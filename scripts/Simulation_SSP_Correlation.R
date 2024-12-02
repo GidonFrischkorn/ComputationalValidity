@@ -8,18 +8,22 @@ Design <- createDesign(
   sample_size = c(100),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("p","sd_0")
+  correlated_par = c("p","sd_0","r")
 )
+
+# Model to simulate
+ssp_model <- dRiftDM::ssp_dm()
+ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
 
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(.4, 0.15, 0.001, 1, 0.5),
-          c(.8, 0.50, 0.010, 4, 2))
+    rbind(c(.4, 0.15, 1, 0.5, 8),
+          c(.8, 0.50, 4, 2.0, 12))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- dRiftDM::ssp_dm()$free_prms
+rownames(par_limits) <- ssp_model$free_prms
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
@@ -41,14 +45,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+# dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -67,7 +71,7 @@ if (!file.exists(here::here("output","res_SSP_correlation.rds")) |
                          save_results_filename = "SSP_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores()/2,
+                       ncores = parallel::detectCores(),
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_correlation.rds"))

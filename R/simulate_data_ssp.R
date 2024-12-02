@@ -9,14 +9,18 @@
 #'
 #' @export
 simulate_data_ssp <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
+  # set up model object
+  ssp_model <- dRiftDM::ssp_dm()
+  ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
+
   # prepare lower and upper bounds for parameters
   if (is.null(par_limits)) {
     # default settings
-    lower_limits <- c(.4, 0.15, 0.001, 1, 0.5)
-    upper_limits <- c(.8, 0.50, 0.010, 4, 2)
+    lower_limits <- c(.4, 0.15, 1, 0.5, 8)
+    upper_limits <- c(.8, 0.50, 4, 2.0, 12)
   } else {
-    if (all(dRiftDM::ssp_dm()$free_prms %in% rownames(par_limits))) {
-      par_limits <- par_limits[dRiftDM::ssp_dm()$free_prms,]
+    if (all(ssp_model$free_prms %in% rownames(par_limits))) {
+      par_limits <- par_limits[ssp_model$free_prms,]
       lower_limits <- par_limits$min
       upper_limits <- par_limits$max
     } else {
@@ -32,11 +36,11 @@ simulate_data_ssp <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
   )
 
   # rename columns with parameter names
-  colnames(sub_parms)[1:5] = dRiftDM::ssp_dm()$free_prms
+  colnames(sub_parms)[1:5] = ssp_model$free_prms
 
   #simulate data
   sim_data = dRiftDM::simulate_data(
-    drift_dm_obj = dRiftDM::ssp_dm(),
+    drift_dm_obj = ssp_model,
     n = n_trials,
     df_prms = sub_parms,
     verbose = verbose
