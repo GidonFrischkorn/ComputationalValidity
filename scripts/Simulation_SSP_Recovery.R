@@ -9,6 +9,10 @@ Design <- createDesign(
   nTrials = c(50,100,200)
 )
 
+# set up model object
+ssp_model <- dRiftDM::ssp_dm()
+ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
+
 # set parameter limits
 par_limits = data.frame(
   t(
@@ -17,7 +21,7 @@ par_limits = data.frame(
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- dRiftDM::ssp_dm()$free_prms
+rownames(par_limits) <- ssp_model$free_prms
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {

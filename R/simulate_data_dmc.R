@@ -11,13 +11,19 @@
 simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
   # set up model object
   dmc_model <- dRiftDM::dmc_dm()
-  dmc_model <- dRiftDM::set_free_prms(dmc_model, c("b", "non_dec", "p", "sd_0","r"))
+  dmc_model <- dRiftDM::set_free_prms(dmc_model, c("muc","b", "non_dec", "tau", "A"))
+  dmc_model <- dRiftDM::set_model_prms(dmc_model,
+                                       new_prm_vals = c(
+                                         muc = 4, b = 0.6, non_dec = 0.3,
+                                         sd_non_dec = 0.002, tau = 0.04, a = 2, A = 0.1,
+                                         alpha = 500
+                                       ))
 
   # prepare lower and upper bounds for parameters
   if (is.null(par_limits)) {
     # default settings
-    lower_limits <- c(1.5, .4, 0.15,0.001,0.02,0.015,10)
-    upper_limits <- c(5, .8, 0.5,0.01,0.12,0.40,10.01)
+    lower_limits <- c(1.5, .4, 0.15,0.02,0.015)
+    upper_limits <- c(5, .8, 0.5,0.12,0.40)
   } else {
     if (all(dmc_model$free_prms %in% rownames(par_limits))) {
       par_limits <- par_limits[dmc_model$free_prms,]
@@ -36,11 +42,11 @@ simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
   )
 
   # rename columns with parameter names
-  colnames(sub_parms)[1:7] = dRiftDM::dmc_dm()$free_prms
+  colnames(sub_parms)[1:5] = dmc_model$free_prms
 
-  #simulate data
+  # simulate data
   sim_data = dRiftDM::simulate_data(
-    drift_dm_obj = dRiftDM::dmc_dm(),
+    drift_dm_obj = dmc_model,
     n = n_trials,
     df_prms = sub_parms,
     verbose = verbose

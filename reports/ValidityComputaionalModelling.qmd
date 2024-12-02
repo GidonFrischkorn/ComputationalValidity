@@ -64,7 +64,7 @@ dmc_effects_behavior <- dmc_recovery_behavior %>%
             .by = c(SampleSize, nTrials, measure, indicator)) %>% 
   pivot_wider(names_from = measure,
               values_from = c(mean, min, max)) %>% 
-  filter(indicator %in% c("mean","diff")) %>% 
+  filter(indicator %in% c("mean","difference")) %>% 
   arrange(indicator, SampleSize, nTrials) %>% 
   select(indicator, SampleSize, nTrials,
          mean_RT, min_RT, max_RT,
@@ -72,76 +72,71 @@ dmc_effects_behavior <- dmc_recovery_behavior %>%
 ```
 
 ```{r}
-#| label: fig-FX-DMC
-#| fig-cap: "Summary of the observed condition differerences and conflict effects in the data simulated from the DMC"
-#| fig-subcap:
-#|   - "Avg. Performance by Condition"
-#|   - "Avg. Conflict Effect"
-#| layout-ncol: 2
-plot_conditions_behavior
-plot_conflictFX_behavior
+#| label: tbl-FX-DMC
+#| tbl-cap: "Summary of the average performance and conflict effects in the data simulated from the DMC"
+knitr::kable(dmc_effects_behavior, digits = 2)
 ```
 
 ```{r}
-dmc_effects_ezDM <- df_ezDM_dmc %>%
+dmc_effects_ezDM <- dmc_recovery_ezDM %>%
   summarize(mean = mean(value),
-            sd = sd(value),
-            .by = c(nRep, SampleSize, nTrials, measure, indicator))
-
-plot_conditions_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter (indicator %in% c("comp", "incomp")),
-       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  clean_plot
-
-plot_conflictFX_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter(indicator %in% c("diff")),
-       aes(x = indicator, y = sd, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  clean_plot
-
-ggsave(filename = here("figures","Plot_DMC_Conditions_ezDM.jpg"),
-       plot_conditions_ezDM, dpi = 300, width = 7, height = 6)
-ggsave(filename = here("figures","Plot_DMC_ConflictFX_ezDM.jpg"),
-       plot_conflictFX_ezDM, dpi = 300, width = 7, height = 6)
+            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
+  mutate(mean = case_when(measure == "non_dec" ~ mean * 1000,
+                          TRUE ~ mean)) %>% 
+  summarize(mean = mean(mean),
+            min = min(mean),
+            max = max(mean),
+            .by = c(SampleSize, nTrials, measure, indicator)) %>% 
+  pivot_wider(names_from = measure,
+              values_from = c(mean, min, max)) %>% 
+  filter(indicator %in% c("mean","difference")) %>% 
+  arrange(indicator, SampleSize, nTrials) %>% 
+  select(indicator, SampleSize, nTrials,
+         mean_drift, min_drift, max_drift,
+         mean_boundary, min_boundary, max_boundary,
+         mean_non_dec, min_non_dec, max_non_dec)
 ```
 
 ```{r}
-#| label: fig-FX-ezDM-DMC
-#| fig-cap: "Summary of the observed condition differerences and conflict effects in the data simulated from the DMC"
-#| fig-subcap:
-#|   - "Avg. Performance by Condition"
-#|   - "Avg. Conflict Effect"
-#| layout-ncol: 2
-plot_conditions_ezDM
-plot_conflictFX_ezDM
+#| label: tbl-FX-ezDM-DMC
+#| tbl-cap: "Summary of the observed condition differerences and conflict effects in the data simulated from the DMC"
+knitr::kable(dmc_effects_ezDM, digits = 2)
 ```
 
 ```{r merge-effects}
+dmc_effects_behavior <- dmc_recovery_behavior %>%
+  summarize(mean = mean(value),
+            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
+  mutate(mean = case_when(measure == "RT" ~ mean * 1000,
+                          TRUE ~ mean * 100))
+dmc_effects_ezDM <- dmc_recovery_ezDM %>%
+  summarize(mean = mean(value),
+            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
+  mutate(mean = case_when(measure == "non_dec" ~ mean * 1000,
+                          TRUE ~ mean))
+
 avg_effects_dmc <- rbind(dmc_effects_behavior,dmc_effects_ezDM)
 
-df_reliability_dmc <- df_reliability_dmc %>%
+dmc_reliability <- dmc_recovery_reliability %>%
   left_join(avg_effects_dmc)
 
-df_recovery_dmc <- df_recovery_dmc %>%
+dmc_parRecovery <- df_recovery_dmc %>%
   left_join(avg_effects_dmc)
 ```
 
 #### Reliability
 
 ```{r}
-ggplot(data = df_reliability_dmc,
+ggplot(data = dmc_recovery_reliability,
        aes(x = as.factor(nTrials), y = reliability, fill = as.factor(SampleSize))) +
   facet_grid(indicator ~ measure) +
   ylim(-1,1) +
   geom_boxplot() +
   labs(x = "Number of Trials in each Condition", y = "Estimated Reliability",
        fill = "Sample Size") +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_reliability_dmc %>% filter(indicator == "diff", SampleSize == 100),
+ggplot(data = dmc_recovery_reliability %>% filter(indicator == "diff", SampleSize == 100),
        aes(x = sd, y = reliability, color = as.factor(nTrials))) +
   facet_grid(nTrials ~ measure, scales = "free") +
   ylim(-1,1) +
@@ -155,7 +150,7 @@ ggplot(data = df_reliability_dmc %>% filter(indicator == "diff", SampleSize == 1
 #### Recovery of DMC parameters
 
 ```{r}
-ggplot(data = df_recovery_dmc %>%
+ggplot(data = dmc_recovery_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC")),
        aes(x = genPar, y = rec, fill = as.factor(nTrials))) +
@@ -255,7 +250,7 @@ ggplot(data = df_recovery_dmc %>%
 ## Appendix
 
 ```{r}
-plot_dmc_effects_behavior <- dmc_effects_behavior <- dmc_recovery_behavior %>%
+dmc_effects_behavior <- dmc_recovery_behavior %>%
   summarize(mean = mean(value),
             .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
   mutate(mean = case_when(measure == "RT" ~ mean * 1000,
@@ -280,4 +275,26 @@ ggsave(filename = here("figures","Plot_DMC_Conditions_Behavior.jpg"),
 ggsave(filename = here("figures","Plot_DMC_ConflictFX_Behavior.jpg"),
        plot_conflictFX_behavior, dpi = 300, width = 7, height = 6)
 ```
+
+```{r}
+plot_conditions_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter (indicator %in% c("comp", "incomp")),
+       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
+  facet_grid(SampleSize ~ measure) +
+  geom_boxplot() +
+  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
+  clean_plot
+
+plot_conflictFX_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter(indicator %in% c("diff")),
+       aes(x = indicator, y = sd, fill = as.factor(nTrials))) +
+  facet_grid(SampleSize ~ measure) +
+  geom_boxplot() +
+  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
+  clean_plot
+
+ggsave(filename = here("figures","Plot_DMC_Conditions_ezDM.jpg"),
+       plot_conditions_ezDM, dpi = 300, width = 7, height = 6)
+ggsave(filename = here("figures","Plot_DMC_ConflictFX_ezDM.jpg"),
+       plot_conflictFX_ezDM, dpi = 300, width = 7, height = 6)
+```
+
 

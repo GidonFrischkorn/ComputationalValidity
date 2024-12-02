@@ -9,26 +9,36 @@ Design <- createDesign(
   nTrials = c(50,100,200)
 )
 
+# set up model to simulate from
+dmc_model <- dRiftDM::dmc_dm()
+dmc_model <- dRiftDM::set_free_prms(dmc_model, c("muc","b", "non_dec", "tau", "A"))
+dmc_model <- dRiftDM::set_model_prms(dmc_model,
+                                     new_prm_vals = c(
+                                       muc = 4, b = 0.6, non_dec = 0.3,
+                                       sd_non_dec = 0.005, tau = 0.04, a = 2, A = 0.1,
+                                       alpha = 500
+                                     ))
+
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(1.5, .4, 0.15,0.001, 0.02, 0.015, 500.00),
-          c(5.0, .8, 0.50,0.010, 0.12, 0.400, 500.01))
+    rbind(c(1.5, .4, 0.15,0.02,0.015),
+          c(5, .8, 0.5,0.12,0.40))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- dRiftDM::dmc_dm()$free_prms
+rownames(par_limits) <- dmc_model$free_prms
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
   Attach(condition)
-  if(!is.null(fixed_objects)) {
+  if (!is.null(fixed_objects)) {
     par_limits = fixed_objects$par_limits
   } else {
     par_limits <- NULL
   }
 
-  dat <- simulate_data_dmc(n_sub = sample_size, n_trials = nTrials)
+  dat <- simulate_data_dmc(n_sub = sample_size, n_trials = nTrials, par_limits = par_limits)
   dat
 }
 
