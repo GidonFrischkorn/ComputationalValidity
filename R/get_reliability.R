@@ -12,7 +12,7 @@ get_reliability <- function(data) {
                  names_to = "indicator") %>%
     pivot_wider(names_from = OddEven,
                 values_from = value) %>%
-    summarize(reliability = (2*cor(odd,even))/(1 + cor(odd,even)), .by = c(task,indicator)) %>%
+    summarize(reliability = (2*cor(odd,even, use = "complete.obs"))/(1 + cor(odd,even, use = "complete.obs")), .by = c(task,indicator)) %>%
     mutate(measure = "PC")
 
   reliability_RT <- data %>%
@@ -28,7 +28,7 @@ get_reliability <- function(data) {
                  names_to = "indicator") %>%
     pivot_wider(names_from = OddEven,
                 values_from = value) %>%
-    summarize(reliability = (2*cor(odd,even))/(1 + cor(odd,even)), .by = c(task,indicator)) %>%
+    summarize(reliability = (2*cor(odd,even, use = "complete.obs"))/(1 + cor(odd,even, use = "complete.obs")), .by = c(task,indicator)) %>%
     mutate(measure = "RT")
 
   reliability_ezDM <- data %>%
@@ -48,7 +48,7 @@ get_reliability <- function(data) {
                  names_to = "indicator") %>%
     pivot_wider(names_from = OddEven,
                 values_from = value) %>%
-    summarize(reliability = (2*cor(odd,even))/(1 + cor(odd,even)), .by = c(task,indicator, measure))
+    summarize(reliability = (2*cor(odd,even, use = "complete.obs"))/(1 + cor(odd,even, use = "complete.obs")), .by = c(task,indicator, measure))
 
   reliability <- rbind(reliability_pc, reliability_RT, reliability_ezDM)
   return(reliability)

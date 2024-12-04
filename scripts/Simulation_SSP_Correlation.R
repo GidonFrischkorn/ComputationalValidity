@@ -2,10 +2,10 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 500
+nReplications <- 250
 
 Design <- createDesign(
-  sample_size = c(100),
+  sample_size = c(200),
   nTrials = c(50,100,200),
   correlation = "random",
   correlated_par = c("p","sd_0","r","p-sd_0","p-r","sd_0-r","p-sd_0-r")
@@ -25,21 +25,34 @@ par_limits = data.frame(
 colnames(par_limits) <- c("min", "max")
 rownames(par_limits) <- ssp_model$free_prms
 
+cor_limits <- c(min = 0.25, max = 0.9)
+
+
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
   Attach(condition)
+
+  # set parameter limits
   if(!is.null(fixed_objects)) {
     par_limits = fixed_objects$par_limits
+    cor_limits = fixed_objects$cor_limits
   } else {
     par_limits <- NULL
+    cor_limits <- c(min = 0, max = 1)
   }
 
+  # get names of correlated parameters
+  pars_correlated <- strsplit(correlated_par, "-")[[1]]
+
   if (correlation == "randomZ") {
-    correlation_Z = runif(1, psych::fisherz(0), psych::fisherz(0.9))
+    correlation_Z = runif(length(pars_correlated), psych::fisherz(cor_limits["min"]), psych::fisherz(cor_limits["max"]))
     correlation = psych::fisherz2r(correlation_Z)
   } else if(correlation == "random") {
-    correlation = runif(1, 0, 0.9)
+    correlation = runif(length(pars_correlated), cor_limits["min"], cor_limits["max"])
+  } else {
+    correlation = rep(correlation, length(pars_correlated))
   }
+  names(correlation) <- pars_correlated
 
   dat <- simulate_correlation_ssp(n_sub = sample_size, n_trials = nTrials,
                                   correlation = correlation, correlated_par = correlated_par,
@@ -47,14 +60,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[10,], fixed_objects = list(par_limits = par_limits))
+# dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -73,7 +86,7 @@ if (!file.exists(here::here("output","res_SSP_correlation.rds")) |
                          save_results_filename = "SSP_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores()/2,
+                       ncores = parallel::detectCores(),
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_correlation.rds"))

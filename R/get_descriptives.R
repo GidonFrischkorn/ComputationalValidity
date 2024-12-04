@@ -5,7 +5,7 @@
 #'
 #'
 #' @export
-get_descriptives_dmc <- function(data, format = "long") {
+get_descriptives <- function(data, format = "long") {
   agg_data_pc <- data %>%
     summarize(PC = 1 - mean(Error), .by = c(ID,Cond,task))
 

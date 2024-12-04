@@ -1,9 +1,10 @@
+#' @export
 get_correlations <- function (data, reliabilites) {
   df_correlation <- data %>%
     pivot_wider(names_from = "task",
                 values_from = "value",
                 names_glue = "task{task}") %>%
-    summarize(correlation = cor(task1,task2),
+    summarize(correlation = cor(task1,task2, use = "complete.obs"),
               .by = c(measure,indicator))
 
   reliability_wide <- reliabilites %>%

@@ -10,10 +10,10 @@
 #' @export
 analyze_correlation <- function(dat) {
   # calculate descriptive performance indicators
-  desc_performance <- get_descriptives_dmc(data = dat$sim_data)
+  desc_performance <- get_descriptives(data = dat$sim_data)
 
   # ezDM parameters
-  ezDM_performance <- get_ezDM_dmc(data = dat$sim_data)
+  ezDM_performance <- get_ezDM(data = dat$sim_data)
 
   # combine descriptive and ezDM performance indicators
   all_performance <- rbind(desc_performance, ezDM_performance)

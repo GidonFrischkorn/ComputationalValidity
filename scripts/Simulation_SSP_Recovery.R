@@ -2,7 +2,7 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 500
+nReplications <- 250
 
 Design <- createDesign(
   sample_size = c(25,50,100),
@@ -16,8 +16,8 @@ ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(.4, 0.15, 0.001, 1, 0.5),
-          c(.8, 0.50, 0.010, 4, 2))
+    rbind(c(.4, 0.15, 1, 0.5, 8),
+          c(.8, 0.50, 4, 2.0, 12))
   )
 )
 colnames(par_limits) <- c("min", "max")
@@ -36,14 +36,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+# dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_data(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -57,12 +57,12 @@ if (!file.exists(here::here("output","res_SSP_recovery.rds")) |
                        fixed_objects = list(par_limits = par_limits),
                        save_details = list(
                          safe = TRUE,
-                         out_rootdir = here::here(),
+                         out_rootdir = "output",
                          save_results_dirname = "output/Simulation_SSP_Recovery",
                          save_results_filename = "SSP_Recovery_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores()/2,
+                       ncores = parallel::detectCores(),
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_recovery.rds"))

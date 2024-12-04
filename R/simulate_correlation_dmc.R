@@ -57,7 +57,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   empirical_correlation = c(correlation)
 
   if (grepl("muc",correlated_par)) {
-    sub_parms_task2$muc = simulate_correlated_vars(sub_parms_task1$muc, correlation = correlation,
+    sub_parms_task2$muc = simulate_correlated_vars(sub_parms_task1$muc, correlation = correlation["muc"],
                                                    mean = mean(sub_parms_task1$muc), sd = sd(sub_parms_task1$muc),
                                                    lb = lower_limits["muc"], ub = upper_limits["muc"])
     observed_correlation = cor(sub_parms_task1$muc, sub_parms_task2$muc)
@@ -65,7 +65,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   }
 
   if(grepl("b", correlated_par)) {
-    sub_parms_task2$b = simulate_correlated_vars(sub_parms_task1$b, correlation = correlation,
+    sub_parms_task2$b = simulate_correlated_vars(sub_parms_task1$b, correlation = correlation["b"],
                                                  mean = mean(sub_parms_task1$b), sd = sd(sub_parms_task1$b),
                                                  lb = lower_limits["b"], ub = upper_limits["b"])
     observerd_correlation = cor(sub_parms_task1$b, sub_parms_task2$b)
@@ -73,7 +73,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   }
 
   if(grepl("non_dec", correlated_par)) {
-    sub_parms_task2$non_dec = simulate_correlated_vars(sub_parms_task1$non_dec, correlation = correlation,
+    sub_parms_task2$non_dec = simulate_correlated_vars(sub_parms_task1$non_dec, correlation = correlation["non_dec"],
                                                        mean = mean(sub_parms_task1$non_dec), sd = sd(sub_parms_task1$non_dec),
                                                        lb = lower_limits["non_dec"], ub = upper_limits["non_dec"])
     observed_correlation = cor(sub_parms_task1$non_dec, sub_parms_task2$non_dec)
@@ -81,7 +81,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   }
 
   if(grepl("tau", correlated_par)) {
-    sub_parms_task2$tau = simulate_correlated_vars(sub_parms_task1$tau, correlation = correlation,
+    sub_parms_task2$tau = simulate_correlated_vars(sub_parms_task1$tau, correlation = correlation["tau"],
                                                    mean = mean(sub_parms_task1$tau), sd = sd(sub_parms_task1$tau),
                                                    lb = lower_limits["tau"], ub = upper_limits["tau"])
     observed_correlation = cor(sub_parms_task1$tau, sub_parms_task2$tau)
@@ -89,7 +89,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   }
 
   if (grepl("A", correlated_par)) {
-    sub_parms_task2$A = simulate_correlated_vars(sub_parms_task1$A, correlation = correlation,
+    sub_parms_task2$A = simulate_correlated_vars(sub_parms_task1$A, correlation = correlation["A"],
                                                  mean = mean(sub_parms_task1$A), sd = sd(sub_parms_task1$A),
                                                  lb = lower_limits["A"], ub = upper_limits["A"])
     observed_correlation = cor(sub_parms_task1$A, sub_parms_task2$A)
@@ -98,8 +98,9 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
 
   # name the generating and empirical correlations
   corr_par_names <- strsplit(correlated_par,"-")[[1]]
-  corr_par_names <- paste0("emp_corr-",corr_par_names)
-  names(empirical_correlation) <- c("gen_corr",corr_par_names)
+  corr_par_names1 <- paste0("true_corr.",corr_par_names)
+  corr_par_names2 <- paste0("emp_corr.",corr_par_names)
+  names(empirical_correlation) <- c(corr_par_names1,corr_par_names2)
 
   # simulate data
   sim_data_task1 = dRiftDM::simulate_data(

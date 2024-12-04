@@ -33,5 +33,7 @@ Imports:
     tidytable,
     stringr,
     ggplot2,
-    here
+    here,
+    psychometric,
+    psych
 VignetteBuilder: knitr

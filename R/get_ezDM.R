@@ -5,7 +5,7 @@
 #'
 #'
 #' @export
-get_ezDM_dmc <- function(data, format = "long") {
+get_ezDM <- function(data, format = "long") {
   # calculate ezDM parameters for each condition
   agg_data_ezDM <- data %>%
     summarize(v = ez_dm(RT = RT, ACC = 1 - Error, robust = TRUE)["v"],

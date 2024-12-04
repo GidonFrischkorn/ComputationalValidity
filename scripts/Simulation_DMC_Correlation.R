@@ -5,7 +5,7 @@ library(ComputationalValidity)
 nReplications <- 250
 
 Design <- createDesign(
-  sample_size = c(100),
+  sample_size = c(200),
   nTrials = c(50,100,200),
   correlation = "random",
   correlated_par = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau")
@@ -24,28 +24,40 @@ dmc_model <- dRiftDM::set_model_prms(dmc_model,
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(1.5, .4, 0.15,0.02,0.015),
-          c(5, .8, 0.5,0.12,0.40))
+    rbind(c(1, .4, 0.15, 0.02, 0.015),
+          c(4, .8, 0.50, 0.12, 0.400))
   )
 )
 colnames(par_limits) <- c("min", "max")
 rownames(par_limits) <- dmc_model$free_prms
 
+cor_limits <- c(min = .25, max = .90)
+
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
   Attach(condition)
+
+  # set parameter limits
   if(!is.null(fixed_objects)) {
     par_limits = fixed_objects$par_limits
+    cor_limits = fixed_objects$cor_limits
   } else {
     par_limits <- NULL
+    cor_limits <- c(min = 0, max = 1)
   }
 
+  # get names of correlated parameters
+  pars_correlated <- strsplit(correlated_par, "-")[[1]]
+
   if (correlation == "randomZ") {
-    correlation_Z = runif(1, psych::fisherz(0), psych::fisherz(0.9))
+    correlation_Z = runif(length(pars_correlated), psych::fisherz(cor_limits["min"]), psych::fisherz(cor_limits["max"]))
     correlation = psych::fisherz2r(correlation_Z)
   } else if(correlation == "random") {
-    correlation = runif(1, 0, 0.9)
+    correlation = runif(length(pars_correlated), cor_limits["min"], cor_limits["max"])
+  } else {
+    correlation = rep(correlation, length(pars_correlated))
   }
+  names(correlation) <- pars_correlated
 
   dat <- simulate_correlation_dmc(n_sub = sample_size, n_trials = nTrials,
                                   correlation = correlation, correlated_par = correlated_par,
@@ -53,14 +65,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits))
+# dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[19,], dat = dat, fixed_objects = list(par_limits = par_limits))
+ret <- Analyse(condition = Design[19,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -71,7 +83,7 @@ if (!file.exists(here::here("output","res_DMC_correlation.rds")) |
    !dir.exists(here::here("output","Simulation_DMC_Correlations"))) {
   res <- runSimulation(design = Design, replications = nReplications,
                        generate = Generate, analyse = Analyse, summarise = Summarise,
-                       fixed_objects = list(par_limits = par_limits),
+                       fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits),
                        save_details = list(
                          safe = TRUE,
                          out_rootdir = here::here("output"),
@@ -79,7 +91,7 @@ if (!file.exists(here::here("output","res_DMC_correlation.rds")) |
                          save_results_filename = "DMC_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores()/2,
+                       ncores = parallel::detectCores(),
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_DMC_correlation.rds"))
