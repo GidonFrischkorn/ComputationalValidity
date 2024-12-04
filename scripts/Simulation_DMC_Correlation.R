@@ -8,7 +8,7 @@ Design <- createDesign(
   sample_size = c(100),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("muc","A","tau","muc_A","muc_tau","A_tau","muc_A_tau")
+  correlated_par = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau")
 )
 
 # set up model to simulate from
@@ -53,14 +53,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-dat <- Generate(condition = Design[7,], fixed_objects = list(par_limits = par_limits))
+dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[7,], dat = dat, fixed_objects = list(par_limits = par_limits))
+ret <- Analyse(condition = Design[19,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {

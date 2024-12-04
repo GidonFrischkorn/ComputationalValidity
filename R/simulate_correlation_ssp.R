@@ -47,11 +47,14 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
   colnames(sub_parms_task1)[1:5] = ssp_model$free_prms
   colnames(sub_parms_task2)[1:5] = ssp_model$free_prms
 
+  empirical_correlation = c(correlation)
+
   if (grepl("p", correlated_par)) {
     sub_parms_task2$p = simulate_correlated_vars(sub_parms_task1$p, correlation = correlation,
                                                    mean = mean(sub_parms_task1$p), sd = sd(sub_parms_task1$p),
                                                    lb = lower_limits["p"], ub = upper_limits["p"])
     observed_correlation = cor(sub_parms_task1$p, sub_parms_task2$p)
+    empirical_correlation <- append(empirical_correlation,observed_correlation)
   }
 
   if (grepl("b", correlated_par)) {
@@ -59,6 +62,7 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
                                                  mean = mean(sub_parms_task1$b), sd = sd(sub_parms_task1$b),
                                                  lb = lower_limits["b"], ub = upper_limits["b"])
     observerd_correlation = cor(sub_parms_task1$b, sub_parms_task2$b)
+    empirical_correlation <- append(empirical_correlation,observed_correlation)
   }
 
   if (grepl("non_dec",correlated_par)) {
@@ -66,6 +70,7 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
                                                        mean = mean(sub_parms_task1$non_dec), sd = sd(sub_parms_task1$non_dec),
                                                        lb = lower_limits["non_dec"], ub = upper_limits["non_dec"])
     observed_correlation = cor(sub_parms_task1$non_dec, sub_parms_task2$non_dec)
+    empirical_correlation <- append(empirical_correlation,observed_correlation)
   }
 
   if (grepl("sd_0", correlated_par)) {
@@ -73,6 +78,7 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
                                                  mean = mean(sub_parms_task1$sd_0), sd = sd(sub_parms_task1$sd_0),
                                                  lb = lower_limits["sd_0"], ub = upper_limits["sd_0"])
     observed_correlation = cor(sub_parms_task1$sd_0, sub_parms_task2$sd_0)
+    empirical_correlation <- append(empirical_correlation,observed_correlation)
   }
 
   if (grepl("r", correlated_par)) {
@@ -80,7 +86,13 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
                                                     mean = mean(sub_parms_task1$r), sd = sd(sub_parms_task1$r),
                                                     lb = lower_limits["r"], ub = upper_limits["r"])
     observed_correlation = cor(sub_parms_task1$r, sub_parms_task2$r)
+    empirical_correlation <- append(empirical_correlation,observed_correlation)
   }
+
+  # name the generating and empirical correlations
+  corr_par_names <- strsplit(correlated_par,"-")[[1]]
+  corr_par_names <- paste0("emp_corr-",corr_par_names)
+  names(empirical_correlation) <- c("gen_corr",corr_par_names)
 
   # simulate data
   sim_data_task1 = dRiftDM::simulate_data(
@@ -111,7 +123,7 @@ simulate_correlation_ssp <- function(n_sub, n_trials, correlation, correlated_pa
   data_list <- list(
     sub_parms = data.table::data.table(sub_parms),
     sim_data = data.table::data.table(sim_data),
-    empirical_correlation = c(true_corr = correlation, emp_corr = observed_correlation)
+    empirical_correlation = empirical_correlation
   )
 
   # return the data_list

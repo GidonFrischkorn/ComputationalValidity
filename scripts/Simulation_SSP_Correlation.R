@@ -8,7 +8,7 @@ Design <- createDesign(
   sample_size = c(100),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("p","sd_0","r","p_sd_0","p_r","sd_0_r","p_sd_0_r")
+  correlated_par = c("p","sd_0","r","p-sd_0","p-r","sd_0-r","p-sd_0-r")
 )
 
 # Model to simulate
@@ -47,7 +47,7 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+# dat <- Generate(condition = Design[10,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
