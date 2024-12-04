@@ -23,6 +23,8 @@ analyze_correlation <- function(dat) {
 
   # recovery of DMC parameters
   correlations <- get_correlations(all_performance, reliabilites = reliability)
+  correlations$true_corr = dat$empirical_correlation["true_corr"]
+  correlations$emp_corr = dat$empirical_correlation["emp_corr"]
 
   return(list(correlations = correlations,
               behavior = desc_performance,

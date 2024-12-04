@@ -2,13 +2,13 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 500
+nReplications <- 250
 
 Design <- createDesign(
   sample_size = c(100),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("muc","A","tau")
+  correlated_par = c("muc","A","tau","muc_A","muc_tau","A_tau","muc_A_tau")
 )
 
 # set up model to simulate from
@@ -40,9 +40,11 @@ Generate <- function(condition, fixed_objects = NULL) {
     par_limits <- NULL
   }
 
-  if (correlation == "random") {
+  if (correlation == "randomZ") {
     correlation_Z = runif(1, psych::fisherz(0), psych::fisherz(0.9))
     correlation = psych::fisherz2r(correlation_Z)
+  } else if(correlation == "random") {
+    correlation = runif(1, 0, 0.9)
   }
 
   dat <- simulate_correlation_dmc(n_sub = sample_size, n_trials = nTrials,
@@ -51,14 +53,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+dat <- Generate(condition = Design[7,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+ret <- Analyse(condition = Design[7,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -72,8 +74,8 @@ if (!file.exists(here::here("output","res_DMC_correlation.rds")) |
                        fixed_objects = list(par_limits = par_limits),
                        save_details = list(
                          safe = TRUE,
-                         out_rootdir = here::here(),
-                         save_results_dirname = "output/Simulation_DMC_Correlations",
+                         out_rootdir = here::here("output"),
+                         save_results_dirname = "Simulation_DMC_Correlations",
                          save_results_filename = "DMC_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,

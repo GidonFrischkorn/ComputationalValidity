@@ -3,26 +3,41 @@ pacman::p_load(here,SimDesign)
 load(here("output","res_DMC_correlation.rds"))
 nReplications <- unique(res$REPLICATIONS)
 allResults <- SimResults(res, prefix = "DMC_Correlation_Cond")
+SimExtract(res, what = "results")
 
 # 1) collect all results ---------------
-for (c in 1:length(allResults)) {
+for (c in 1:nrow(res)) {
+  cond_filename <- paste0("DMC_Correlation_Cond-",c,".rds")
+
   # get the results from one condition
-  results_cond <- allResults[[c]]
+  results_cond <- readRDS(here("output","Simulation_DMC_Correlation",cond_filename))
 
   # separate condition info from results object
   condition <- results_cond$condition
   results <- results_cond$results
 
   # collect the recoveries in one data frame
-  df_recovery <- do.call(rbind,
+  df_correlations <- do.call(rbind,
                          lapply(1:nReplications,
-                                function(ind, res) res[[ind]]$recovery %>%
+                                function(ind, res) res[[ind]]$correlations %>%
                                   mutate(nRep = ind),
                                 res = results))
 
   # add condition information
-  df_recovery$SampleSize <- condition$sample_size
-  df_recovery$nTrials <- condition$nTrials
+  df_correlations$SampleSize <- condition$sample_size
+  df_correlations$nTrials <- condition$nTrials
+
+  # collect the recoveries in one data frame
+  df_gen_correlations <- do.call(rbind,
+                             lapply(1:nReplications,
+                                    function(ind, res) res[[ind]]$genCorr %>%
+                                      as.data.frame() %>%
+                                      mutate(nRep = ind),
+                                    res = results))
+
+  # add condition information
+  df_correlations$SampleSize <- condition$sample_size
+  df_correlations$nTrials <- condition$nTrials
 
   # collect the recoveries in one data frame
   df_behavior <- do.call(rbind,

@@ -15,7 +15,7 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   dmc_model <- dRiftDM::set_model_prms(dmc_model,
                                        new_prm_vals = c(
                                          muc = 4, b = 0.6, non_dec = 0.3,
-                                         sd_non_dec = 0.002, tau = 0.04, a = 2, A = 0.1,
+                                         sd_non_dec = 0.005, tau = 0.04, a = 2, A = 0.1,
                                          alpha = 500
                                        ))
 
@@ -54,33 +54,39 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   colnames(sub_parms_task1)[1:5] = dmc_model$free_prms
   colnames(sub_parms_task2)[1:5] = dmc_model$free_prms
 
-  if ("muc" == correlated_par) {
+  if (grepl("muc",correlated_par)) {
     sub_parms_task2$muc = simulate_correlated_vars(sub_parms_task1$muc, correlation = correlation,
                                                    mean = mean(sub_parms_task1$muc), sd = sd(sub_parms_task1$muc),
                                                    lb = lower_limits["muc"], ub = upper_limits["muc"])
     observed_correlation = cor(sub_parms_task1$muc, sub_parms_task2$muc)
-  } else if("b" == correlated_par) {
+  }
+
+  if(grepl("b", correlated_par)) {
     sub_parms_task2$b = simulate_correlated_vars(sub_parms_task1$b, correlation = correlation,
                                                  mean = mean(sub_parms_task1$b), sd = sd(sub_parms_task1$b),
                                                  lb = lower_limits["b"], ub = upper_limits["b"])
     observerd_correlation = cor(sub_parms_task1$b, sub_parms_task2$b)
-  } else if("non_dec" == correlated_par) {
+  }
+
+  if(grepl("non_dec", correlated_par)) {
     sub_parms_task2$non_dec = simulate_correlated_vars(sub_parms_task1$non_dec, correlation = correlation,
                                                        mean = mean(sub_parms_task1$non_dec), sd = sd(sub_parms_task1$non_dec),
                                                        lb = lower_limits["non_dec"], ub = upper_limits["non_dec"])
     observed_correlation = cor(sub_parms_task1$non_dec, sub_parms_task2$non_dec)
-  } else if("tau" == correlated_par) {
+  }
+
+  if(grepl("tau", correlated_par)) {
     sub_parms_task2$tau = simulate_correlated_vars(sub_parms_task1$tau, correlation = correlation,
                                                    mean = mean(sub_parms_task1$tau), sd = sd(sub_parms_task1$tau),
                                                    lb = lower_limits["tau"], ub = upper_limits["tau"])
     observed_correlation = cor(sub_parms_task1$tau, sub_parms_task2$tau)
-  } else if("A" == correlated_par) {
+  }
+
+  if (grepl("A", correlated_par)) {
     sub_parms_task2$A = simulate_correlated_vars(sub_parms_task1$A, correlation = correlation,
                                                  mean = mean(sub_parms_task1$A), sd = sd(sub_parms_task1$A),
                                                  lb = lower_limits["A"], ub = upper_limits["A"])
     observed_correlation = cor(sub_parms_task1$A, sub_parms_task2$A)
-  } else {
-    stop("No valid parameter to correlate specified. Please specify one of the following: muc, b, non_dec, tau, A.")
   }
 
   # simulate data

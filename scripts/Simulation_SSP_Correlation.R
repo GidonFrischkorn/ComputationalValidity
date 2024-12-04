@@ -8,7 +8,7 @@ Design <- createDesign(
   sample_size = c(100),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("p","sd_0","r")
+  correlated_par = c("p","sd_0","r","p_sd_0","p_r","sd_0_r","p_sd_0_r")
 )
 
 # Model to simulate
@@ -34,9 +34,11 @@ Generate <- function(condition, fixed_objects = NULL) {
     par_limits <- NULL
   }
 
-  if (correlation == "random") {
+  if (correlation == "randomZ") {
     correlation_Z = runif(1, psych::fisherz(0), psych::fisherz(0.9))
     correlation = psych::fisherz2r(correlation_Z)
+  } else if(correlation == "random") {
+    correlation = runif(1, 0, 0.9)
   }
 
   dat <- simulate_correlation_ssp(n_sub = sample_size, n_trials = nTrials,
@@ -66,12 +68,12 @@ if (!file.exists(here::here("output","res_SSP_correlation.rds")) |
                        fixed_objects = list(par_limits = par_limits),
                        save_details = list(
                          safe = TRUE,
-                         out_rootdir = here::here(),
-                         save_results_dirname = "output/Simulation_SSP_Correlations",
+                         out_rootdir = here::here("output"),
+                         save_results_dirname = "Simulation_SSP_Correlations",
                          save_results_filename = "SSP_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = parallel::detectCores()/2,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_correlation.rds"))
