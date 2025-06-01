@@ -1,6 +1,10 @@
+# start fresh
+rm(list = ls())   # clean up work space
+graphics.off()  # switch off graphics device
+
 load(here("output","res_SSP_recovery.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res,prefix = "SSP_Recovery_Cond")
+allResults <- SimResults(res,prefix = "SSP_Recovery_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
 for (c in 1:length(allResults)) {
@@ -129,7 +133,7 @@ ssp_recovery_parRecovery$nTrials <- factor(ssp_recovery_parRecovery$nTrials,
                                     levels = c("50","100","200"))
 
 # 3) Save to Package ---------------
-use_data(ssp_recovery_behavior, overwrite = TRUE, compress = "xz")
-use_data(ssp_recovery_ezDM, overwrite = TRUE, compress = "xz")
-use_data(ssp_recovery_reliability, overwrite = TRUE, compress = "xz")
-use_data(ssp_recovery_parRecovery, overwrite = TRUE, compress = "xz")
+usethis::use_data(ssp_recovery_behavior, overwrite = TRUE, compress = "xz")
+usethis::use_data(ssp_recovery_ezDM, overwrite = TRUE, compress = "xz")
+usethis::use_data(ssp_recovery_reliability, overwrite = TRUE, compress = "xz")
+usethis::use_data(ssp_recovery_parRecovery, overwrite = TRUE, compress = "xz")

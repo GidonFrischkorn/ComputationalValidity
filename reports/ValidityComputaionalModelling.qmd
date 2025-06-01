@@ -34,15 +34,11 @@ Following commonly used definitions of validity and propositions of validity res
 
 ## Conflating theoretical with psychometrics questions
 
-
 ## Validity from a computational modeling perspective
 
 ### Computational Models implement how processes cause changes in observed behavior
 
-
 ### Identifying suitable compuational models
-
-
 
 ## Identifying valid behavioral performance measures for inhibition processes
 
@@ -105,12 +101,12 @@ knitr::kable(dmc_effects_ezDM, digits = 2)
 
 ```{r merge-effects}
 dmc_effects_behavior <- dmc_recovery_behavior %>%
-  summarize(mean = mean(value),
+  summarize(mean = mean(value), sd = sd(value),
             .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
   mutate(mean = case_when(measure == "RT" ~ mean * 1000,
                           TRUE ~ mean * 100))
 dmc_effects_ezDM <- dmc_recovery_ezDM %>%
-  summarize(mean = mean(value),
+  summarize(mean = mean(value), sd = sd(value),
             .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
   mutate(mean = case_when(measure == "non_dec" ~ mean * 1000,
                           TRUE ~ mean))
@@ -120,23 +116,27 @@ avg_effects_dmc <- rbind(dmc_effects_behavior,dmc_effects_ezDM)
 dmc_reliability <- dmc_recovery_reliability %>%
   left_join(avg_effects_dmc)
 
-dmc_parRecovery <- df_recovery_dmc %>%
+dmc_parRecovery <- dmc_recovery_parRecovery %>%
   left_join(avg_effects_dmc)
 ```
 
 #### Reliability
 
 ```{r}
-ggplot(data = dmc_recovery_reliability,
+ggplot(data = dmc_reliability,
        aes(x = as.factor(nTrials), y = reliability, fill = as.factor(SampleSize))) +
   facet_grid(indicator ~ measure) +
   ylim(-1,1) +
+  geom_hline(yintercept = 0, linewidth = 1) +
+  geom_hline(yintercept = 0.7, linewidth = 1, linetype = "dotted", color = "green") +
+  geom_hline(yintercept = 0.9, linewidth = 1, linetype = "dotted", color = "darkgreen") +
   geom_boxplot() +
   labs(x = "Number of Trials in each Condition", y = "Estimated Reliability",
-       fill = "Sample Size") +
+       fill = "Sample Size",
+       title = "Reliability estimates (Split-Half correlation) of performance indicators") +
   theme_gf()
 
-ggplot(data = dmc_recovery_reliability %>% filter(indicator == "diff", SampleSize == 100),
+ggplot(data = dmc_reliability %>% filter(indicator == "difference", SampleSize == "N = 100"),
        aes(x = sd, y = reliability, color = as.factor(nTrials))) +
   facet_grid(nTrials ~ measure, scales = "free") +
   ylim(-1,1) +
@@ -144,13 +144,13 @@ ggplot(data = dmc_recovery_reliability %>% filter(indicator == "diff", SampleSiz
   geom_smooth(method = "lm") +
   labs(x = "Standard Deviation of Conflict Effect", y = "Estimated Reliability",
        color = "Number of Trials") +
-  clean_plot
+  theme_gf()
 ```
 
 #### Recovery of DMC parameters
 
 ```{r}
-ggplot(data = dmc_recovery_parRecovery %>%
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC")),
        aes(x = genPar, y = rec, fill = as.factor(nTrials))) +
@@ -162,12 +162,12 @@ ggplot(data = dmc_recovery_parRecovery %>%
   labs(x = "Generating DMC Parameter", y = "Recovery",
        fill = "Sample Size") +
   coord_cartesian(ylim = c(-1,1)) +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_recovery_dmc %>%
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC"),
-                indicator %in% c("diff")),
+                indicator %in% c("difference")),
        aes(x = mean, y = rec, color = as.factor(SampleSize))) +
   facet_grid(measure ~ genPar) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
@@ -178,12 +178,13 @@ ggplot(data = df_recovery_dmc %>%
   labs(x = "Mean Conflict Effect in the Sample", y = "Recovery",
        fill = "Sample Size") +
   coord_cartesian(ylim = c(-1,1)) +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_recovery_dmc %>%
+
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC"),
-                indicator %in% c("diff")),
+                indicator %in% c("difference")),
        aes(x = sd, y = rec, color = as.factor(SampleSize))) +
   facet_grid(measure ~ genPar, scale = "free") +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
@@ -194,12 +195,13 @@ ggplot(data = df_recovery_dmc %>%
   labs(x = "SD of Conflict Effect in the Sample", y = "Recovery",
        fill = "Sample Size") +
   coord_cartesian(ylim = c(-1,1)) +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_recovery_dmc %>%
+
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
-                measure %in% c("v","a","t0")),
-       aes(x = genPar, y = rec, fill = as.factor(SampleSize))) +
+                measure %in% c("drift","boundary","non_dec")),
+       aes(x = genPar, y = rec, fill = SampleSize)) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
   geom_hline(yintercept = 0.3, color = "darkred", linetype = "dotted") +
@@ -208,12 +210,13 @@ ggplot(data = df_recovery_dmc %>%
   coord_cartesian(ylim = c(-1,1)) +
   labs(x = "Generating DMC Parameter", y = "Recovery",
        fill = "Sample Size") +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_recovery_dmc %>%
+
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
                 measure %in% c("RT","PC"),
-                SampleSize == 100),
+                SampleSize == "N = 100"),
        aes(x = genPar, y = rec_corrected, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
@@ -224,12 +227,13 @@ ggplot(data = df_recovery_dmc %>%
   coord_cartesian(ylim = c(-1,1)) +
   labs(x = "Generating DMC Parameter", y = "Recovery (Corrected for Reliability)",
        fill = "Sample Size") +
-  clean_plot
+  theme_gf()
 
-ggplot(data = df_recovery_dmc %>%
+
+ggplot(data = dmc_parRecovery %>%
          filter(genPar %in% c("A","b","muc","non_dec","tau"),
-                measure %in% c("v","a","t0"),
-                SampleSize == 100),
+                measure %in% c("drift","boundary","non_dec"),
+                SampleSize == "N = 100"),
        aes(x = genPar, y = rec_corrected, fill = as.factor(nTrials))) +
   facet_grid(measure ~ indicator) +
   geom_hline(yintercept = 0, color = "darkred", linewidth = 1) +
@@ -240,61 +244,9 @@ ggplot(data = df_recovery_dmc %>%
   coord_cartesian(ylim = c(-1,1)) +
   labs(x = "Generating DMC Parameter", y = "Recovery (Corrected for Reliability)",
        fill = "Sample Size") +
-  clean_plot
+  theme_gf()
 ```
-
-
 
 ### Simulation II: Shrinking Spotlight Model of Attention
 
 ## Appendix
-
-```{r}
-dmc_effects_behavior <- dmc_recovery_behavior %>%
-  summarize(mean = mean(value),
-            .by = c(nRep, SampleSize, nTrials, measure, indicator)) %>%
-  mutate(mean = case_when(measure == "RT" ~ mean * 1000,
-                          TRUE ~ mean * 100))
-
-plot_conditions_behavior <- ggplot(data = plot_dmc_effects_behavior %>% filter (indicator %in% c("comp", "incomp")),
-       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  theme_gf()
-
-plot_conflictFX_behavior <- ggplot(data = plot_dmc_effects_behavior %>% filter (indicator %in% c("difference")),
-       aes(y = sd, fill = nTrials)) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Average Conflict Effect", fill = "Trials in each\nCondition") +
-  theme_gf()
-
-ggsave(filename = here("figures","Plot_DMC_Conditions_Behavior.jpg"),
-       plot_conditions_behavior, dpi = 300, width = 7, height = 6)
-ggsave(filename = here("figures","Plot_DMC_ConflictFX_Behavior.jpg"),
-       plot_conflictFX_behavior, dpi = 300, width = 7, height = 6)
-```
-
-```{r}
-plot_conditions_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter (indicator %in% c("comp", "incomp")),
-       aes(x = indicator, y = mean, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  clean_plot
-
-plot_conflictFX_ezDM <- ggplot(data = dmc_effects_ezDM %>% filter(indicator %in% c("diff")),
-       aes(x = indicator, y = sd, fill = as.factor(nTrials))) +
-  facet_grid(SampleSize ~ measure) +
-  geom_boxplot() +
-  labs(x = "Condition", y = "Performance", fill = "Trials in each\nCondition") +
-  clean_plot
-
-ggsave(filename = here("figures","Plot_DMC_Conditions_ezDM.jpg"),
-       plot_conditions_ezDM, dpi = 300, width = 7, height = 6)
-ggsave(filename = here("figures","Plot_DMC_ConflictFX_ezDM.jpg"),
-       plot_conflictFX_ezDM, dpi = 300, width = 7, height = 6)
-```
-
-

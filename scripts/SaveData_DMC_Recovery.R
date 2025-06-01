@@ -1,6 +1,10 @@
+# start fresh
+rm(list = ls())   # clean up work space
+graphics.off()  # switch off graphics device
+
 load(here("output","res_DMC_recovery.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res,prefix = "DMC_Recovery_Cond")
+allResults <- SimResults(res, prefix = "DMC_Recovery_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
 for (c in 1:length(allResults)) {
@@ -77,7 +81,7 @@ rm(allResults,res)
 
 # 2) Code Factors ---------------
 
-# Bahvioral Results
+# Behavioral Results
 dmc_recovery_behavior$measure <- factor(dmc_recovery_behavior$measure,
                                         levels = c("RT","PC"))
 dmc_recovery_behavior$indicator <- factor(dmc_recovery_behavior$indicator,
@@ -107,11 +111,25 @@ levels(dmc_recovery_ezDM$SampleSize) <- c("N = 25","N = 50","N = 100")
 dmc_recovery_ezDM$nTrials <- factor(dmc_recovery_ezDM$nTrials,
                                         levels = c("50","100","200"))
 
+# Reliability of performance indicators
+dmc_recovery_reliability$measure <- factor(dmc_recovery_reliability$measure,
+                                    levels = c("PC","RT","v","a","t0"))
+levels(dmc_recovery_reliability$measure) <- c("RT","PC","drift","boundary","non_dec")
+
+dmc_recovery_reliability$indicator <- factor(dmc_recovery_reliability$indicator,
+                                      levels = c("mean","comp","incomp","diff"))
+levels(dmc_recovery_reliability$indicator) <- c("mean","congruent","incongruent","difference")
+
+dmc_recovery_reliability$SampleSize <- factor(dmc_recovery_reliability$SampleSize,
+                                       levels = c("25","50","100"))
+levels(dmc_recovery_reliability$SampleSize) <- c("N = 25","N = 50","N = 100")
+
+dmc_recovery_reliability$nTrials <- factor(dmc_recovery_reliability$nTrials,
+                                    levels = c("50","100","200"))
 
 # Recovery of DMC parameters
 dmc_recovery_parRecovery$genPar <- factor(dmc_recovery_parRecovery$genPar,
                                           levels = c("A","tau","muc","b","non_dec","sd_non_dec","alpha"))
-
 
 dmc_recovery_parRecovery$measure <- factor(dmc_recovery_parRecovery$measure,
                                     levels = c("RT","PC","v","a","t0"))
@@ -129,7 +147,7 @@ dmc_recovery_parRecovery$nTrials <- factor(dmc_recovery_parRecovery$nTrials,
                                     levels = c("50","100","200"))
 
 # 3) Save to Package ---------------
-use_data(dmc_recovery_behavior, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_ezDM, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_reliability, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_parRecovery, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_recovery_behavior, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_recovery_ezDM, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_recovery_reliability, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_recovery_parRecovery, overwrite = TRUE, compress = "xz")

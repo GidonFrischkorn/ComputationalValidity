@@ -22,8 +22,8 @@ simulate_correlation_dmc <- function(n_sub, n_trials, correlation, correlated_pa
   # prepare lower and upper bounds for parameters
   if (is.null(par_limits)) {
     # default settings
-    lower_limits <- c(1.5, .4, 0.15,0.02,0.015)
-    upper_limits <- c(5, .8, 0.5,0.12,0.40)
+    lower_limits <- c(1.5, .4, 0.15, 0.02, 0.015)
+    upper_limits <- c(4.0, .8, 0.40, 0.12, 0.400)
   } else {
     if (all(dmc_model$free_prms %in% rownames(par_limits))) {
       par_limits <- par_limits[dmc_model$free_prms,]

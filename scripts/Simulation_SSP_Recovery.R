@@ -58,11 +58,11 @@ if (!file.exists(here::here("output","res_SSP_recovery.rds")) |
                        save_details = list(
                          safe = TRUE,
                          out_rootdir = "output",
-                         save_results_dirname = "output/Simulation_SSP_Recovery",
+                         save_results_dirname = "Simulation_SSP_Recovery",
                          save_results_filename = "SSP_Recovery_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = parallel::detectCores()/2,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_recovery.rds"))

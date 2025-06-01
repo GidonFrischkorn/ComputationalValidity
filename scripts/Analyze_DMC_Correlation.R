@@ -3,12 +3,12 @@ rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
 
 # use relative paths to load & save data
-pacman::p_load(here,SimDesign,tidytable,data.table, ggplot2)
-nReplications <- 500
+pacman::p_load(SimDesign,tidytable,data.table, ggplot2)
+nReplications <- 10
 
 ## Collect Results -------------------------------------------------------------
-load(here("output","res_DMC_simulation.rds"))
-allResults <- SimResults(res, wd = here(""))
+load(here("output","res_DMC_correlation.rds"))
+allResults <- SimResults(res)
 
 # loop through simulation conditions to collect all results
 for (c in 1:length(allResults)) {

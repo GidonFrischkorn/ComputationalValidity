@@ -2,7 +2,7 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 250
+nReplications <- 10
 
 Design <- createDesign(
   sample_size = c(200),
@@ -25,7 +25,7 @@ dmc_model <- dRiftDM::set_model_prms(dmc_model,
 par_limits = data.frame(
   t(
     rbind(c(1, .4, 0.15, 0.02, 0.015),
-          c(4, .8, 0.50, 0.12, 0.400))
+          c(4, .8, 0.40, 0.12, 0.400))
   )
 )
 colnames(par_limits) <- c("min", "max")
@@ -65,14 +65,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
+# dat <- Generate(condition = Design[7,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-ret <- Analyse(condition = Design[19,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
+# ret <- Analyse(condition = Design[19,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {

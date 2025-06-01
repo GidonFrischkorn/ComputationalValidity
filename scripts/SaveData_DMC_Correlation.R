@@ -1,16 +1,15 @@
-pacman::p_load(here,SimDesign)
+# start fresh
+rm(list = ls())   # clean up work space
+graphics.off()  # switch off graphics device
 
 load(here("output","res_DMC_correlation.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res, prefix = "DMC_Correlation_Cond")
-SimExtract(res, what = "results")
+allResults <- SimResults(res, prefix = "DMC_Correlation_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
-for (c in 1:nrow(res)) {
-  cond_filename <- paste0("DMC_Correlation_Cond-",c,".rds")
-
+for (c in 1:length(allResults)) {
   # get the results from one condition
-  results_cond <- readRDS(here("output","Simulation_DMC_Correlation",cond_filename))
+  results_cond <- allResults[[c]]
 
   # separate condition info from results object
   condition <- results_cond$condition
@@ -26,18 +25,20 @@ for (c in 1:nrow(res)) {
   # add condition information
   df_correlations$SampleSize <- condition$sample_size
   df_correlations$nTrials <- condition$nTrials
+  df_correlations$correlated_par <- condition$correlated_par
 
-  # collect the recoveries in one data frame
-  df_gen_correlations <- do.call(rbind,
-                             lapply(1:nReplications,
-                                    function(ind, res) res[[ind]]$genCorr %>%
-                                      as.data.frame() %>%
-                                      mutate(nRep = ind),
-                                    res = results))
-
-  # add condition information
-  df_correlations$SampleSize <- condition$sample_size
-  df_correlations$nTrials <- condition$nTrials
+  # # collect the recoveries in one data frame
+  # df_gen_correlations <- do.call(rbind,
+  #                            lapply(1:nReplications,
+  #                                   function(ind, res) res[[ind]]$genCorr %>%
+  #                                     as.data.frame() %>%
+  #                                     mutate(nRep = ind),
+  #                                   res = results))
+  # colnames(df_gen_correlations) <- c(stringr::str_split(condition$correlated_par, pattern = "-")[[1]],"nRep")
+  #
+  # # add condition information
+  # df_gen_correlations$SampleSize <- condition$sample_size
+  # df_gen_correlations$nTrials <- condition$nTrials
 
   # collect the recoveries in one data frame
   df_behavior <- do.call(rbind,
@@ -75,22 +76,49 @@ for (c in 1:nrow(res)) {
   # write condition recoveries and descriptive statistics into the overall results
   # data frame
   if (c == 1) {
-    dmc_recovery_behavior <- data.table(df_behavior)
-    dmc_recovery_ezDM <- data.table(df_ezDM)
-    dmc_recovery_parRecovery <- data.table(df_recovery)
-    dmc_recovery_reliability <- data.table(df_reliability)
+    dmc_correlation_recCorrs <- data.table(df_correlations)
+    dmc_correlation_behavior <- data.table(df_behavior)
+    dmc_correlation_ezDM <- data.table(df_ezDM)
+    dmc_correlation_reliability <- data.table(df_reliability)
+    # dmc_correlation_genCorrs <- data.table(df_gen_correlations)
   } else {
-    dmc_recovery_behavior <- rbind(dmc_recovery_behavior,data.table(df_behavior))
-    dmc_recovery_ezDM <- rbind(dmc_recovery_ezDM,data.table(df_ezDM))
-    dmc_recovery_parRecovery <- rbind(dmc_recovery_parRecovery,data.table(df_recovery))
-    dmc_recovery_reliability <- rbind(dmc_recovery_reliability,data.table(df_reliability))
+    dmc_correlation_recCorrs <- rbind(dmc_correlation_recCorrs,data.table(df_correlations), fill = TRUE)
+    dmc_correlation_behavior <- rbind(dmc_correlation_behavior,data.table(df_behavior), fill = TRUE)
+    dmc_correlation_ezDM <- rbind(dmc_correlation_ezDM,data.table(df_ezDM), fill = TRUE)
+    dmc_correlation_reliability <- rbind(dmc_correlation_reliability,data.table(df_reliability), fill = TRUE)
+    # dmc_correlation_genCorrs <- rbind(dmc_correlation_genCorrs,data.table(df_gen_correlations))
   }
 
   # clean up after each iteration
   rm(results_cond,condition,results,
-     df_behavior,df_ezDM,df_recovery,df_reliability)
+     df_correlations,df_behavior,df_ezDM,df_gen_correlations,df_reliability)
 }
 rm(allResults,res)
+
+
+ggplot(data = dmc_correlation_recCorrs,
+       aes(y = correlation, x = emp_corr.muc, color = as.factor(nTrials))) +
+  facet_grid(measure ~ indicator) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point() +
+  geom_smooth(method = "lm", formula = "y ~ x")
+
+ggplot(data = dmc_correlation_recCorrs,
+       aes(y = correlation, x = emp_corr.A, color = as.factor(nTrials))) +
+  facet_grid(measure ~ indicator) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point() +
+  geom_smooth(method = "lm", formula = "y ~ x")
+
+ggplot(data = dmc_correlation_recCorrs,
+       aes(y = correlation, x = emp_corr.tau, color = as.factor(nTrials))) +
+  facet_grid(measure ~ indicator) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point() +
+  geom_smooth(method = "lm", formula = "y ~ x")
 
 # 2) Code Factors ---------------
 

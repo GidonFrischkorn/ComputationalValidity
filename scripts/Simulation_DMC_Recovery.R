@@ -68,7 +68,7 @@ if (!file.exists(here::here("output","res_DMC_recovery.rds")) |
                          save_results_filename = "DMC_Recovery_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = parallel::detectCores()/2,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_DMC_recovery.rds"))
