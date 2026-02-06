@@ -8,10 +8,11 @@
 get_ezDM <- function(data, format = "long") {
   # calculate ezDM parameters for each condition
   agg_data_ezDM <- data %>%
-    summarize(v = ez_dm(RT = RT, ACC = 1 - Error, robust = TRUE)["v"],
-              a = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["a"],
-              t0 = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["t0"],
-              .by = c(ID,Cond,task)) %>%
+    summarize(
+      v = ez_dm(RT = RT, ACC = 1 - Error)["v"],
+      a = ez_dm(RT = RT, ACC = 1 - Error)["a"],
+      t0 = ez_dm(RT = RT, ACC = 1 - Error)["t0"],
+      .by = c(ID,Cond,task)) %>%
     pivot_longer(cols = c("v","a","t0"),
                  names_to = "measure") %>%
     pivot_wider(names_from = c("Cond"),

@@ -1,6 +1,6 @@
 ---
-title: "Establishing validity from a computational modeling perspective"
-subtitle: "An example focussing on inhibition."
+title: "Validity is a Theoretical Problem "
+subtitle: "A Computational Psychometrics Perspective on Cognitive Task Validity"
 author: "Gidon T. Frischkorn, Ricardo Rebmann, & Klaus Oberauer"
 format: html
 editor: visual
@@ -28,21 +28,264 @@ pacman::p_load(here, SimDesign, tidytable, data.table, ggplot2, ComputationalVal
 # source(here("scripts","LoadResultsFiles.R"))
 ```
 
-## Establishing validity from a computational modeling perspective: An example focusing on inhibition
+## 1. Introduction: Why Validity Remains a Foundational Problem in Cognitive Psychology
 
-Following commonly used definitions of validity and propositions of validity researchers, establishing the validity of a newly developed measure or test requires its integration in the nomological network of psychological constructs [@cronbachConstructValidityPsychological1955] and providing sufficient evidence for its interpretation and practical use [@messickValidity1987]
+### Purpose of this section
+- Establish validity—not reliability or replication—as the core unresolved issue in cognitive psychology.
+- Motivate the paper without framing it as a crisis narrative.
 
-## Conflating theoretical with psychometrics questions
+### Key points to develop
+- Cognitive psychology relies on experimental tasks to draw inferences about latent cognitive constructs.
+- Persistent difficulties in cognitive individual-differences research (e.g., weak task correlations, unstable factor structures, task-specific effects) point to unresolved questions about what task performance means.
+- These difficulties are often treated as methodological or psychometric problems, but they reflect a deeper theoretical issue.
 
-## Validity from a computational modeling perspective
+### Thesis
+> Validity in cognitive psychology is not primarily a psychometric property of tasks or indicators, but a theoretical property of the assumptions linking cognitive processes to observable behavior.
 
-### Computational Models implement how processes cause changes in observed behavior
+### Scope clarification
+- This paper does not aim to resolve debates about the structure of executive functions, intelligence, or attention control.
+- These domains are used as illustrative cases for a general theoretical problem.
 
-### Identifying suitable compuational models
+---
 
-## Identifying valid behavioral performance measures for inhibition processes
+## 2. Classical Views of Construct Validity and Their Implicit Theoretical Commitments
 
-Here we focus on computational models for traditional inhibition tasks such as the Stroop [@stroopStudiesInterferenceSerial1935], Flanker [@eriksenEffectsNoiseLetters1974], or Simon [@simonEffectCompatibilitySR1981] task. These are particularly relevant as the traditional indicator for inhibition from these tasks - that is the difference of reaction times from correct responses between incongruent and congruent conditions- has been criticized for its bad psychometric properties [@draheimReactionTimeDifferential2019; @vonbastianAdvancingUnderstandingIndividual2020]. The main point of criticism was that reaction times are affected by speed-accuracy trade offs and tend to be unreliable, in particular when considering experimental effect measures.
+### Purpose
+- Show that theory has always been central to validity, but that its role has often remained underspecified in cognitive task research.
+
+### Key points
+- Convergent and divergent validity and nomological networks presuppose substantive theory.
+- Unified validity frameworks emphasize inference and meaning but leave process representation implicit.
+- The distinction between construct representation and nomothetic span foreshadows contemporary validity problems.
+
+### Central claim
+- Classical frameworks do not fail because they are wrong, but because their theoretical requirements are rarely met in cognitive psychology.
+
+---
+
+## 3. Circularity in Task-Based Validation of Cognitive Constructs
+
+### Purpose
+- Diagnose why task–task relations and factor structures cannot ground validity claims.
+
+### Key points
+- Empirical patterns in cognitive individual-differences research include weak and inconsistent task correlations, the reliability paradox, and task-specific effects.
+- Attention control research provides a paradigmatic example: toolbox approaches improve reliability and task sampling, yet validity is still inferred from indicator overlap and factor coherence.
+
+### Core argument
+> When tasks are validated by their relations to other tasks assumed to measure the same construct, validity becomes circular.
+
+### Takeaway
+- Correlational structure cannot adjudicate which cognitive processes tasks actually measure.
+
+---
+
+## 4. From Constructs to Processes: Reframing the Validity Question
+
+### Purpose
+- Introduce the central conceptual shift from construct-centered to process-centered validity.
+
+### Key distinctions
+- Constructs as explanatory abstractions.
+- Cognitive processes as hypothesized causal mechanisms.
+- Model parameters as formal representations of process properties.
+- Behavioral indicators as noisy, aggregate consequences of multiple processes.
+
+### Core claim
+> A task is valid for a cognitive process only insofar as variation in that process can be shown—under explicit theoretical assumptions—to causally influence observable behavior.
+
+---
+
+## 5. Validity Without Full Mechanistic Models: A Lower Bound on Theoretical Commitment
+
+### Purpose
+- Demonstrate that validity assessment already requires explicit theory, even in the absence of fully specified generative models.
+
+### Case example
+- The antisaccade task and the validity of inhibition as a target process.
+
+### Key points
+- Explicit theoretical definition of inhibition.
+- Derivation of qualitative and constrained quantitative predictions.
+- Systematic evaluation of alternative process explanations.
+
+### Insight
+> Validity assessment requires explicit process theory, even when no fully mechanistic model is available.
+
+---
+
+## 6. Limits of Semi-Formal Validity Analyses
+
+### Purpose
+- Clarify why semi-formal, process-theoretical analyses are necessary but insufficient.
+
+### Key points
+- Such analyses can falsify naïve task–process mappings and expose construct misinterpretations.
+- They cannot quantify parameter trade-offs, assess indicator selectivity, or support claims about parameter equivalence across tasks.
+
+### Transition
+- These limitations motivate fully generative models as the most transparent framework for validity analysis.
+
+---
+
+## 7. Validity as a Model-Relative Property
+
+### Purpose
+- Clarify what computational psychometrics does and does not promise.
+
+### Key points
+- Validity is not a property of tasks, indicators, or latent factors.
+- It is a property of model-based inferences linking processes to observations.
+- Different models can generate similar predictions, highlighting theoretical underdetermination.
+
+### Implication
+- Formal modeling sharpens validity claims but does not eliminate the need for strong theoretical commitments.
+
+---
+
+## 8. Why Generative Cognitive Models Are Especially Suited for Validity Analysis
+
+### Purpose
+- Provide a positive but disciplined justification for generative modeling in validity research.
+
+### Key points
+- Generative models make assumptions explicit, reveal identifiability problems, and force clear parameter–indicator mappings.
+- They function as theory-driven measurement models rather than mere curve-fitting tools.
+
+### Boundary condition
+- Generative models discipline validity arguments but do not guarantee their correctness.
+
+---
+
+## 9. Conflict Tasks as an Exemplar Domain
+
+### Purpose
+- Introduce a concrete task domain to illustrate the general argument.
+
+### Key points
+- Conflict tasks are central to theories of attention control and executive function.
+- They are widely used in individual-differences research and supported by a rich modeling tradition.
+- Standard behavioral indicators are often interpreted as process-pure without formal justification.
+
+---
+
+## 10. Demonstration: Model-Based Validity Analysis Using Conflict Task Models
+
+### Purpose
+- Illustrate how model-based analyses clarify indicator meaning.
+
+### Key points
+- Simulations show that multiple parameters can influence the same behavioral indicators.
+- The same indicator can reflect different processes under different plausible models.
+
+### Explicit limitation
+- The goal is not to adjudicate between specific models, but to demonstrate how validity depends on theoretical assumptions.
+
+### Proposed figures (DMC model - main text)
+- **DMC_Parameter_Confounding**: Show equifinality problem - multiple parameters can generate similar behavioral patterns
+- **DMC_Differential_Validity**: Demonstrate that RT and PC indicators recover different underlying parameters
+- **DMC_Reliability_Paradox**: Illustrate that high reliability doesn't guarantee parameter recovery
+
+---
+
+// Abgrenzung Diffusions modell von Verhaltensindikatoren, was ist Indikator was Prozess?
+## 11. From Indicator Overlap to Parameter Overlap: Implications for Construct Building
+
+### Purpose
+- Reconstruct higher-order constructs on a principled basis.
+
+### Key points
+- Stable individual differences should be located at the level of model parameters rather than task scores.
+- Parameter overlap across task models provides a theoretically grounded basis for broader constructs.
+- Such overlap is a hypothesis requiring explicit justification, not an empirical given.
+
+### Proposed figures (DMC model - main text)
+- **DMC_Correlation_Transfer**: Show that correlations at the parameter level don't necessarily transfer to behavioral indicators
+- **DMC_Model_Guided_Selection**: Decision matrix showing which behavioral indicators validly measure which theoretical constructs under explicit model assumptions
+
+---
+
+## 12. Implications for Measuring Attention Control and Cognitive Abilities
+
+### Purpose
+- Translate the theoretical framework into measurement implications.
+
+### Key points
+- Improved reliability and task sampling are necessary but insufficient for validity.
+- Latent factors may reflect general speed, strategy, or caution rather than target processes.
+- Valid measurement requires explicit justification of parameter–indicator mappings.
+
+### Proposed figures (DMC model - main text)
+- **DMC_Intermediate_Modeling**: Show that even simplified computational models (ezDM) don't always outperform behavioral indicators - demonstrates that model complexity alone doesn't solve validity problems
+
+---
+
+## 13. Model Dependence, Underdetermination, and Theoretical Progress
+
+### Purpose
+- Address limitations and objections to model-based validity.
+
+### Key points
+- All validity claims are conditional on theoretical assumptions.
+- Competing models clarify theoretical commitments rather than undermining progress.
+- Scientific progress depends on refining models, not accumulating tasks.
+
+### Proposed figures (SSP model - supplement or online materials)
+- **SSP_Parameter_Confounding**: Demonstrate equifinality holds across different model architectures
+- **SSP_Differential_Validity**: Show differential indicator validity generalizes to alternative theories
+- **SSP_Reliability_Paradox**: Confirm reliability paradox isn't DMC-specific
+- **SSP_Correlation_Transfer**: Show correlation transfer limitations are model-general
+- **SSP_Model_Guided_Selection**: Decision matrix for SSP shows architecture-specific validity patterns
+- **SSP_Intermediate_Modeling**: ezDM limitations extend to spotlight models
+
+### Rationale for supplementary placement
+These SSP figures serve as robustness checks demonstrating that the validity principles aren't artifacts of one specific model architecture. They support the claim that validity problems are theoretical rather than model-specific, but the conceptual arguments can be made effectively with the DMC results alone in the main text.
+
+---
+
+## 14. Conclusion: Validity as a Commitment to Theory
+
+### Final synthesis
+- Cognitive tasks do not measure constructs directly.
+- Validity is established through explicit theoretical commitments linking processes to behavior.
+- Computational psychometrics provides a disciplined framework for making these commitments transparent and testable.
+
+### Closing message
+> Advancing validity in cognitive psychology requires not better correlations, but better theories of how cognition generates data.
+
+---
+
+## Figure Strategy and Model Selection
+
+### Main text figures (6 figures from DMC model)
+1. **DMC_Parameter_Confounding** (Section 10): Equifinality - multiple parameters influence same indicators
+2. **DMC_Differential_Validity** (Section 10): RT vs PC indicators recover different parameters
+3. **DMC_Reliability_Paradox** (Section 10): High reliability ≠ parameter recovery
+4. **DMC_Correlation_Transfer** (Section 11): Parameter correlations don't transfer to indicators
+5. **DMC_Model_Guided_Selection** (Section 11): Decision matrix for indicator validity
+6. **DMC_Intermediate_Modeling** (Section 12): Simple models don't solve validity problems
+
+### Supplementary materials (6 figures from SSP model)
+All SSP figures replicate the DMC patterns with an alternative model architecture, demonstrating:
+- Validity problems are theoretical, not model-specific
+- Principles generalize across different cognitive architectures
+- Architecture-specific validity patterns exist (e.g., SSP-specific parameters like perceptual input and initial noise)
+
+### Rationale for single-model main text
+**Arguments for showing only DMC in main text:**
+1. **Conceptual clarity**: The conceptual arguments about validity don't require model comparisons - they require one clear, well-understood example
+2. **Reader accessibility**: DMC is more widely known in cognitive psychology; reduces cognitive load
+3. **Sufficient demonstration**: All key validity principles (equifinality, differential validity, reliability paradox, correlation transfer, model-guided selection) can be demonstrated with one model
+4. **Space efficiency**: 6 figures provide complete story without redundancy
+5. **Supplement serves robustness**: SSP results demonstrate generalizability without cluttering the conceptual narrative
+
+**Arguments for including both models:**
+1. **Architectural generalization**: Shows principles aren't DMC-specific artifacts
+2. **Theoretical underdetermination**: Directly illustrates Section 13's point about model dependence
+3. **Comprehensive empirical support**: Strengthens empirical claims
+
+**Recommendation**: Use DMC figures only in main text, with SSP figures as supplementary materials. The conceptual argument is stronger when focused, and the supplement provides empirical robustness without diluting the narrative. Readers can consult SSP figures to verify generalizability, but the core validity principles are best communicated through a single, clear exemplar.
+
 
 ### Simulation I: Diffusion Model for Conflict Tasks
 

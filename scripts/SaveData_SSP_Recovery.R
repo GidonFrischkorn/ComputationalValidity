@@ -2,6 +2,12 @@
 rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
 
+library(here)
+library(SimDesign)
+library(tidytable)
+library(data.table)
+library(usethis)
+
 load(here("output","res_SSP_recovery.rds"))
 nReplications <- unique(res$REPLICATIONS)
 allResults <- SimResults(res,prefix = "SSP_Recovery_Cond", wd = here("output"))

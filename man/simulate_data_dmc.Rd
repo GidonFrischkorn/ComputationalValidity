@@ -4,17 +4,19 @@
 \alias{simulate_data_dmc}
 \title{Simulate Data for the DMC}
 \usage{
-simulate_data_dmc(n_sub, n_trials, par_limits = NULL, verbose = 0)
+simulate_data_dmc(n_sub, n_trials, par_limits = NULL, verbose = 0, seed = NULL)
 }
 \arguments{
 \item{n_sub}{A single numeric value specifying for how many subjects data should be simulated.}
 
 \item{n_trials}{A single numeric value specifying how many trials per condition should be simulated.}
 
-\item{par_limits}{A data.frame containing two variables: min & max with 7 values
-for each parameter of the DMC. You have to either include a third variable `par_name` labeling
-which row contains information for which parameters or name the rows of the data frame.
-Parameter names of the dmc parameters can be obtained via: `dRiftDM::dmc_dm()$free_prms`}
+\item{par_limits}{A data.frame containing two variables: min & max with 5 values
+for each varying parameter of the DMC (muc, b, non_dec, tau, A).
+You have to either include a third variable `par_name` labeling
+which row contains information for which parameters or name the rows of the data frame.}
+
+\item{seed}{Optional random seed for reproducibility. If NULL, no seed is set.}
 }
 \description{
 Simulate Data for the DMC

@@ -3,34 +3,28 @@
 \docType{data}
 \name{dmc_recovery_ezDM}
 \alias{dmc_recovery_ezDM}
-\title{ezDM Results from the `DMC Recovery` simulation}
+\title{EZ-Diffusion Model Results from the DMC Recovery Simulation}
 \format{
 ## `dmc_recovery_ezDM`
-A data frame with 25920 rows and 13 columns:
+A data frame with multiple rows containing:
 \describe{
-  \item{Exp}{Label for the Experiment in the whole experiment series}
-  \item{ID}{Unique integer code for each subject who participated in the experiment}
-  \item{Block}{The experimental block a trial was part of.}
-  \item{trial}{The trial number of the current trial}
-  \item{cueLoc}{The cue location coded as a numeric value from 1 to 4.
-  1 = "top", 2 = "right", 3 = "bottom", 4 = "left"}
-  \item{stimLoc}{The stimulus location coded as a numeric value from 1 to 4.
-  1 = "top", 2 = "right", 3 = "bottom", 4 = "left"}
-  \item{locDist}{The distance between the cue and stimulus location coded as a factor,
-  "same" = same location for cue and stimulus, "close" = the cue was one spatial position away from the stimulus,
-  "opposite" = the cue was presented opposite of the stimulus}
-  \item{FixDur}{The fixation duration preceeding each trial in milliseconds.}
-  \item{CTI}{The cue target intercal coded in milliseconds.}
-  \item{stim}{The letter stimulus that was presented to be identified.}
-  \item{response}{The response given by the subject as the letter on the keyboard.}
-  \item{correct}{Logical variable indicating the response was correct (TRUE) or incorrect (FALSE)}
-  \item{RTms}{Reaction Time of the response in milliseconds}
+  \item{measure}{EZ-DM parameter: "drift" (v), "boundary" (a), or "non_dec" (t0)}
+  \item{indicator}{Experimental condition: "mean", "congruent", "incongruent", or "difference"}
+  \item{value}{The estimated EZ-DM parameter value}
+  \item{nRep}{Replication number (1-250)}
+  \item{SampleSize}{Sample size factor: "N = 25", "N = 50", or "N = 100"}
+  \item{nTrials}{Number of trials per condition: "50", "100", or "200"}
 }
+}
+\source{
+Generated via `scripts/SaveData_DMC_Recovery.R` from simulation results
 }
 \usage{
 dmc_recovery_ezDM
 }
 \description{
-ezDM Results from the `DMC Recovery` simulation
+Contains EZ-diffusion model parameter estimates (drift rate, boundary, non-decision time)
+computed from simulated DMC data. EZ-DM is a simplified diffusion model that provides
+quick parameter estimates from aggregate RT and accuracy data.
 }
 \keyword{datasets}

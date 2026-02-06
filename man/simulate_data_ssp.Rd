@@ -4,7 +4,7 @@
 \alias{simulate_data_ssp}
 \title{Simulate Data for the SSP}
 \usage{
-simulate_data_ssp(n_sub, n_trials, par_limits = NULL, verbose = 0)
+simulate_data_ssp(n_sub, n_trials, par_limits = NULL, verbose = 0, seed = NULL)
 }
 \arguments{
 \item{n_sub}{A single numeric value specifying for how many subjects data should be simulated.}
@@ -15,6 +15,8 @@ simulate_data_ssp(n_sub, n_trials, par_limits = NULL, verbose = 0)
 for each parameter of the SSP. You have to either include a third variable `par_name` labeling
 which row contains information for which parameters or name the rows of the data frame.
 Parameter names of the SSP parameters can be obtained via: `dRiftDM::ssp_dm()$free_prms`}
+
+\item{seed}{Optional random seed for reproducibility. If NULL, no seed is set.}
 }
 \description{
 Simulate Data for the SSP

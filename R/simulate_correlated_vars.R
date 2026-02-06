@@ -29,5 +29,5 @@ simulate_correlated_vars <- function(values, correlation, mean = 0, sd = 1, lb =
   bounded_correlated_var <- pmin(pmax(correlated_var, lb), ub)
 
   # Return bounded correlated variable
-  return(correlated_var)
+  return(bounded_correlated_var)
 }

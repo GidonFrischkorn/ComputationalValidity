@@ -2,6 +2,12 @@
 rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
 
+library(here)
+library(SimDesign)
+library(tidytable)
+library(data.table)
+library(usethis)
+
 load(here("output","res_DMC_recovery.rds"))
 nReplications <- unique(res$REPLICATIONS)
 allResults <- SimResults(res, prefix = "DMC_Recovery_Cond", wd = here("output"))
@@ -114,7 +120,7 @@ dmc_recovery_ezDM$nTrials <- factor(dmc_recovery_ezDM$nTrials,
 # Reliability of performance indicators
 dmc_recovery_reliability$measure <- factor(dmc_recovery_reliability$measure,
                                     levels = c("PC","RT","v","a","t0"))
-levels(dmc_recovery_reliability$measure) <- c("RT","PC","drift","boundary","non_dec")
+levels(dmc_recovery_reliability$measure) <- c("PC","RT","drift","boundary","non_dec")
 
 dmc_recovery_reliability$indicator <- factor(dmc_recovery_reliability$indicator,
                                       levels = c("mean","comp","incomp","diff"))

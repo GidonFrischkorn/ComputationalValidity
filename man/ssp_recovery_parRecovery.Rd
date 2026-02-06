@@ -3,34 +3,30 @@
 \docType{data}
 \name{ssp_recovery_parRecovery}
 \alias{ssp_recovery_parRecovery}
-\title{Parameter Recovery Results from the `DMC Recovery` simulation}
+\title{Parameter Recovery Results from the SSP Recovery Simulation}
 \format{
-## `dmc_recovery_parRecovery`
-A data frame with 25920 rows and 13 columns:
+## `ssp_recovery_parRecovery`
+A data frame with multiple rows containing:
 \describe{
-  \item{Exp}{Label for the Experiment in the whole experiment series}
-  \item{ID}{Unique integer code for each subject who participated in the experiment}
-  \item{Block}{The experimental block a trial was part of.}
-  \item{trial}{The trial number of the current trial}
-  \item{cueLoc}{The cue location coded as a numeric value from 1 to 4.
-  1 = "top", 2 = "right", 3 = "bottom", 4 = "left"}
-  \item{stimLoc}{The stimulus location coded as a numeric value from 1 to 4.
-  1 = "top", 2 = "right", 3 = "bottom", 4 = "left"}
-  \item{locDist}{The distance between the cue and stimulus location coded as a factor,
-  "same" = same location for cue and stimulus, "close" = the cue was one spatial position away from the stimulus,
-  "opposite" = the cue was presented opposite of the stimulus}
-  \item{FixDur}{The fixation duration preceeding each trial in milliseconds.}
-  \item{CTI}{The cue target intercal coded in milliseconds.}
-  \item{stim}{The letter stimulus that was presented to be identified.}
-  \item{response}{The response given by the subject as the letter on the keyboard.}
-  \item{correct}{Logical variable indicating the response was correct (TRUE) or incorrect (FALSE)}
-  \item{RTms}{Reaction Time of the response in milliseconds}
+  \item{genPar}{Generating SSP parameter: "p", "b", "sd_0", "non_dec", etc.}
+  \item{measure}{Indicator type: "RT", "PC", "drift", "boundary", or "non_dec"}
+  \item{indicator}{Experimental condition: "mean", "congruent", "incongruent", or "difference"}
+  \item{rec}{Recovery correlation}
+  \item{rec_corrected}{Recovery correlation corrected for indicator reliability}
+  \item{nRep}{Replication number (1-250)}
+  \item{SampleSize}{Sample size factor: "N = 25", "N = 50", or "N = 100"}
+  \item{nTrials}{Number of trials per condition: "50", "100", or "200"}
 }
+}
+\source{
+Generated via `scripts/SaveData_SSP_Recovery.R` from simulation results
 }
 \usage{
 ssp_recovery_parRecovery
 }
 \description{
-Parameter Recovery Results from the `DMC Recovery` simulation
+Contains correlations between generating SSP parameters and recovered parameters.
+SSP parameters include: perceptual input (p), boundary (b), initial noise (sd_0),
+and non-decision time (non_dec).
 }
 \keyword{datasets}

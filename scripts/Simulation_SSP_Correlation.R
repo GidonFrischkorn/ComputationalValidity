@@ -8,22 +8,26 @@ Design <- createDesign(
   sample_size = c(200),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("p","sd_0","r","p-sd_0","p-r","sd_0-r","p-sd_0-r")
+  correlated_par = c("p","sd_0","p-sd_0")
 )
 
-# Model to simulate
-ssp_model <- dRiftDM::ssp_dm()
-ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
+# Model to simulate - use simplified model (no r parameter)
+ssp_model <- dRiftDM::ssp_dm(var_non_dec = FALSE, var_start = FALSE)
+
+# Set parameters to estimate using flex_prms accessor
+fp <- dRiftDM::flex_prms(ssp_model)
+fp$prms_to_estimate <- c("b", "non_dec", "p", "sd_0")
+dRiftDM::flex_prms(ssp_model) <- fp
 
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(.4, 0.15, 1, 0.5, 8),
-          c(.8, 0.50, 4, 2.0, 12))
+    rbind(c(.4, 0.15, 1, 0.5),
+          c(.8, 0.50, 4, 2.0))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- ssp_model$free_prms
+rownames(par_limits) <- dRiftDM::flex_prms(ssp_model)$prms_to_estimate
 
 cor_limits <- c(min = 0.25, max = 0.9)
 
@@ -60,14 +64,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[19,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
+dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
 }
 
-# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
+ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {
@@ -78,7 +82,7 @@ if (!file.exists(here::here("output","res_SSP_correlation.rds")) |
    !dir.exists(here::here("output","Simulation_SSP_Correlations"))) {
   res <- runSimulation(design = Design, replications = nReplications,
                        generate = Generate, analyse = Analyse, summarise = Summarise,
-                       fixed_objects = list(par_limits = par_limits),
+                       fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits),
                        save_details = list(
                          safe = TRUE,
                          out_rootdir = here::here("output"),
@@ -86,7 +90,7 @@ if (!file.exists(here::here("output","res_SSP_correlation.rds")) |
                          save_results_filename = "SSP_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = 10,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_SSP_correlation.rds"))

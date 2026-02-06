@@ -2,6 +2,13 @@
 rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
 
+library(here)
+library(SimDesign)
+library(tidytable)
+library(data.table)
+library(usethis)
+library(ggplot2)
+
 load(here("output","res_DMC_correlation.rds"))
 nReplications <- unique(res$REPLICATIONS)
 allResults <- SimResults(res, prefix = "DMC_Correlation_Cond", wd = here("output"))
@@ -23,7 +30,7 @@ for (c in 1:length(allResults)) {
                                 res = results))
 
   # add condition information
-  df_correlations$SampleSize <- condition$sample_size
+  df_correlations$SampleSize <- as.character(condition$sample_size)
   df_correlations$nTrials <- condition$nTrials
   df_correlations$correlated_par <- condition$correlated_par
 
@@ -48,7 +55,7 @@ for (c in 1:length(allResults)) {
                                 res = results))
 
   # add condition information
-  df_behavior$SampleSize <- condition$sample_size
+  df_behavior$SampleSize <- as.character(condition$sample_size)
   df_behavior$nTrials <- condition$nTrials
 
   # collect the recoveries in one data frame
@@ -59,7 +66,7 @@ for (c in 1:length(allResults)) {
                             res = results))
 
   # add condition information
-  df_ezDM$SampleSize <- condition$sample_size
+  df_ezDM$SampleSize <- as.character(condition$sample_size)
   df_ezDM$nTrials <- condition$nTrials
 
   # collect descriptive statistics in one data frame
@@ -70,7 +77,7 @@ for (c in 1:length(allResults)) {
                                    res = results))
 
   # add condition information
-  df_reliability$SampleSize <- condition$sample_size
+  df_reliability$SampleSize <- as.character(condition$sample_size)
   df_reliability$nTrials <- condition$nTrials
 
   # write condition recoveries and descriptive statistics into the overall results
@@ -122,59 +129,82 @@ ggplot(data = dmc_correlation_recCorrs,
 
 # 2) Code Factors ---------------
 
-# Bahvioral Results
-dmc_recovery_behavior$measure <- factor(dmc_recovery_behavior$measure,
+# Behavioral Results
+dmc_correlation_behavior$measure <- factor(dmc_correlation_behavior$measure,
                                         levels = c("RT","PC"))
-dmc_recovery_behavior$indicator <- factor(dmc_recovery_behavior$indicator,
+dmc_correlation_behavior$indicator <- factor(dmc_correlation_behavior$indicator,
                                         levels = c("mean","comp","incomp","diff"))
-levels(dmc_recovery_behavior$indicator) <- c("mean","congruent","incongruent","difference")
+levels(dmc_correlation_behavior$indicator) <- c("mean","congruent","incongruent","difference")
 
-dmc_recovery_behavior$SampleSize <- factor(dmc_recovery_behavior$SampleSize,
-                                          levels = c("25","50","100"))
-levels(dmc_recovery_behavior$SampleSize) <- c("N = 25","N = 50","N = 100")
+dmc_correlation_behavior$SampleSize <- factor(dmc_correlation_behavior$SampleSize,
+                                          levels = c("200"))
+levels(dmc_correlation_behavior$SampleSize) <- c("N = 200")
 
-dmc_recovery_behavior$nTrials <- factor(dmc_recovery_behavior$nTrials,
+dmc_correlation_behavior$nTrials <- factor(dmc_correlation_behavior$nTrials,
                                            levels = c("50","100","200"))
 
+dmc_correlation_behavior$correlated_par <- factor(dmc_correlation_behavior$correlated_par,
+                                                   levels = c("muc","A","muc-A-tau"))
+
 # ezDM Results
-dmc_recovery_ezDM$measure <- factor(dmc_recovery_ezDM$measure,
+dmc_correlation_ezDM$measure <- factor(dmc_correlation_ezDM$measure,
                                         levels = c("v","a","t0"))
-levels(dmc_recovery_ezDM$measure) <- c("drift","boundary","non_dec")
+levels(dmc_correlation_ezDM$measure) <- c("drift","boundary","non_dec")
 
-dmc_recovery_ezDM$indicator <- factor(dmc_recovery_ezDM$indicator,
+dmc_correlation_ezDM$indicator <- factor(dmc_correlation_ezDM$indicator,
                                           levels = c("mean","comp","incomp","diff"))
-levels(dmc_recovery_ezDM$indicator) <- c("mean","congruent","incongruent","difference")
+levels(dmc_correlation_ezDM$indicator) <- c("mean","congruent","incongruent","difference")
 
-dmc_recovery_ezDM$SampleSize <- factor(dmc_recovery_ezDM$SampleSize,
-                                           levels = c("25","50","100"))
-levels(dmc_recovery_ezDM$SampleSize) <- c("N = 25","N = 50","N = 100")
+dmc_correlation_ezDM$SampleSize <- factor(dmc_correlation_ezDM$SampleSize,
+                                           levels = c("200"))
+levels(dmc_correlation_ezDM$SampleSize) <- c("N = 200")
 
-dmc_recovery_ezDM$nTrials <- factor(dmc_recovery_ezDM$nTrials,
+dmc_correlation_ezDM$nTrials <- factor(dmc_correlation_ezDM$nTrials,
                                         levels = c("50","100","200"))
 
+dmc_correlation_ezDM$correlated_par <- factor(dmc_correlation_ezDM$correlated_par,
+                                               levels = c("muc","A","muc-A-tau"))
 
-# Recovery of DMC parameters
-dmc_recovery_parRecovery$genPar <- factor(dmc_recovery_parRecovery$genPar,
-                                          levels = c("A","tau","muc","b","non_dec","sd_non_dec","alpha"))
-
-
-dmc_recovery_parRecovery$measure <- factor(dmc_recovery_parRecovery$measure,
+# Reliability Results
+dmc_correlation_reliability$measure <- factor(dmc_correlation_reliability$measure,
                                     levels = c("RT","PC","v","a","t0"))
-levels(dmc_recovery_parRecovery$measure) <- c("RT","PC","drift","boundary","non_dec")
+levels(dmc_correlation_reliability$measure) <- c("RT","PC","drift","boundary","non_dec")
 
-dmc_recovery_parRecovery$indicator <- factor(dmc_recovery_parRecovery$indicator,
+dmc_correlation_reliability$indicator <- factor(dmc_correlation_reliability$indicator,
                                       levels = c("mean","comp","incomp","diff"))
-levels(dmc_recovery_parRecovery$indicator) <- c("mean","congruent","incongruent","difference")
+levels(dmc_correlation_reliability$indicator) <- c("mean","congruent","incongruent","difference")
 
-dmc_recovery_parRecovery$SampleSize <- factor(dmc_recovery_parRecovery$SampleSize,
-                                       levels = c("25","50","100"))
-levels(dmc_recovery_parRecovery$SampleSize) <- c("N = 25","N = 50","N = 100")
+dmc_correlation_reliability$SampleSize <- factor(dmc_correlation_reliability$SampleSize,
+                                       levels = c("200"))
+levels(dmc_correlation_reliability$SampleSize) <- c("N = 200")
 
-dmc_recovery_parRecovery$nTrials <- factor(dmc_recovery_parRecovery$nTrials,
+dmc_correlation_reliability$nTrials <- factor(dmc_correlation_reliability$nTrials,
                                     levels = c("50","100","200"))
 
+dmc_correlation_reliability$correlated_par <- factor(dmc_correlation_reliability$correlated_par,
+                                                      levels = c("muc","A","muc-A-tau"))
+
+# Correlation Results
+dmc_correlation_recCorrs$measure <- factor(dmc_correlation_recCorrs$measure,
+                                            levels = c("RT","PC","v","a","t0"))
+levels(dmc_correlation_recCorrs$measure) <- c("RT","PC","drift","boundary","non_dec")
+
+dmc_correlation_recCorrs$indicator <- factor(dmc_correlation_recCorrs$indicator,
+                                              levels = c("mean","comp","incomp","diff"))
+levels(dmc_correlation_recCorrs$indicator) <- c("mean","congruent","incongruent","difference")
+
+dmc_correlation_recCorrs$SampleSize <- factor(dmc_correlation_recCorrs$SampleSize,
+                                               levels = c("200"))
+levels(dmc_correlation_recCorrs$SampleSize) <- c("N = 200")
+
+dmc_correlation_recCorrs$nTrials <- factor(dmc_correlation_recCorrs$nTrials,
+                                            levels = c("50","100","200"))
+
+dmc_correlation_recCorrs$correlated_par <- factor(dmc_correlation_recCorrs$correlated_par,
+                                                   levels = c("muc","A","muc-A-tau"))
+
 # 3) Save to Package ---------------
-use_data(dmc_recovery_behavior, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_ezDM, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_reliability, overwrite = TRUE, compress = "xz")
-use_data(dmc_recovery_parRecovery, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_correlation_behavior, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_correlation_ezDM, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_correlation_reliability, overwrite = TRUE, compress = "xz")
+usethis::use_data(dmc_correlation_recCorrs, overwrite = TRUE, compress = "xz")

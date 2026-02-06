@@ -34,10 +34,11 @@ get_reliability <- function(data) {
   reliability_ezDM <- data %>%
     mutate(trialNum = 1:n(), .by = c(ID,task,Cond)) %>%
     mutate(OddEven = ifelse(trialNum %% 2 == 0, "even","odd")) %>%
-    summarize(v = ez_dm(RT = RT, ACC = 1 - Error, robust = TRUE)["v"],
-              a = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["a"],
-              t0 = ez_dm(RT = RT, ACC =  1 - Error, robust = TRUE)["t0"],
-              .by = c(ID,Cond,OddEven,task)) %>%
+    summarize(
+      v = ez_dm(RT = RT, ACC = 1 - Error)["v"],
+      a = ez_dm(RT = RT, ACC = 1 - Error)["a"],
+      t0 = ez_dm(RT = RT, ACC = 1 - Error)["t0"],
+      .by = c(ID,Cond,OddEven,task)) %>%
     pivot_longer(cols = c("v","a","t0"),
                  names_to = "measure") %>%
     pivot_wider(names_from = c("Cond"),

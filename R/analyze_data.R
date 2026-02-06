@@ -14,6 +14,13 @@ analyze_data <- function(dat) {
 
   # ezDM parameters
   ezDM_performance <- get_ezDM(data = dat$sim_data)
+  
+  # Check for failed estimates
+  n_failed <- sum(is.na(ezDM_performance$value))
+  if (n_failed > 0) {
+    warning(sprintf("EZ-DM estimation failed for %d out of %d observations (%.1f%%)",
+                    n_failed, nrow(ezDM_performance), 100 * n_failed / nrow(ezDM_performance)))
+  }
 
   # combine descriptive and ezDM performance indicators
   all_performance <- rbind(desc_performance, ezDM_performance)
@@ -28,6 +35,7 @@ analyze_data <- function(dat) {
               behavior = desc_performance,
               ezDM = ezDM_performance,
               reliability = reliability,
-              genPars = dat$sub_parms))
+              genPars = dat$sub_parms,
+              n_failed_estimates = n_failed))
 
 }

@@ -1,5 +1,6 @@
 library(SimDesign)
 library(ComputationalValidity)
+library(dRiftDM)
 
 # Set Up Design & Number of Replications per condition
 nReplications <- 250
@@ -10,24 +11,18 @@ Design <- createDesign(
 )
 
 # set up model to simulate from
-dmc_model <- dRiftDM::dmc_dm()
-dmc_model <- dRiftDM::set_free_prms(dmc_model, c("muc","b", "non_dec", "tau", "A"))
-dmc_model <- dRiftDM::set_model_prms(dmc_model,
-                                     new_prm_vals = c(
-                                       muc = 4, b = 0.6, non_dec = 0.3,
-                                       sd_non_dec = 0.005, tau = 0.04, a = 2, A = 0.1,
-                                       alpha = 500
-                                     ))
+dmc_model <- dRiftDM::dmc_dm(var_non_dec = FALSE, var_start = FALSE)
+print(dmc_model)
 
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(1.5, .4, 0.15, 0.02, 0.015),
-          c(4.0, .8, 0.50, 0.12, 0.400))
+    rbind(c(1.5, .4, 0.15, 0.02,0, 0.015),
+          c(4.0, .8, 0.50, 0.12,0, 0.400))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- dmc_model$free_prms
+rownames(par_limits) <- colnames(dmc_model$flex_prms_obj$prms_matrix)
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
@@ -42,14 +37,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_data(dat)
   ret
 }
 
-# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {

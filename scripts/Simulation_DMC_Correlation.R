@@ -2,7 +2,7 @@ library(SimDesign)
 library(ComputationalValidity)
 
 # Set Up Design & Number of Replications per condition
-nReplications <- 10
+nReplications <- 250
 
 Design <- createDesign(
   sample_size = c(200),
@@ -11,25 +11,18 @@ Design <- createDesign(
   correlated_par = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau")
 )
 
-# set up model to simulate from
-dmc_model <- dRiftDM::dmc_dm()
-dmc_model <- dRiftDM::set_free_prms(dmc_model, c("muc","b", "non_dec", "tau", "A"))
-dmc_model <- dRiftDM::set_model_prms(dmc_model,
-                                     new_prm_vals = c(
-                                       muc = 4, b = 0.6, non_dec = 0.3,
-                                       sd_non_dec = 0.002, tau = 0.04, a = 2, A = 0.1,
-                                       alpha = 500
-                                     ))
+# set up model to simulate from - match DMC_Recovery configuration
+dmc_model <- dRiftDM::dmc_dm(var_non_dec = FALSE, var_start = FALSE)
 
-# set parameter limits
+# set parameter limits - match DMC_Recovery exactly
 par_limits = data.frame(
   t(
-    rbind(c(1, .4, 0.15, 0.02, 0.015),
-          c(4, .8, 0.40, 0.12, 0.400))
+    rbind(c(1.5, .4, 0.15, 0.02, 0.015),
+          c(4.0, .8, 0.50, 0.12, 0.400))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- dmc_model$free_prms
+rownames(par_limits) <- c("muc", "b", "non_dec", "tau", "A")
 
 cor_limits <- c(min = .25, max = .90)
 
@@ -67,6 +60,12 @@ Generate <- function(condition, fixed_objects = NULL) {
 
 # dat <- Generate(condition = Design[7,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
+sub_pars <- dat$sub_parms %>%
+  pivot_wider(names_from = task, values_from = all_of(rownames(par_limits)), names_sep = "_")
+cor(sub_pars$A_1, sub_pars$A_2)
+cor(sub_pars$muc_1, sub_pars$muc_2)
+cor(sub_pars$tau_1, sub_pars$tau_2)
+
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret
@@ -91,7 +90,7 @@ if (!file.exists(here::here("output","res_DMC_correlation.rds")) |
                          save_results_filename = "DMC_Correlation_Cond"),
                        save_results = TRUE,
                        parallel = TRUE,
-                       ncores = parallel::detectCores(),
+                       ncores = 10,
                        packages = c("ComputationalValidity","data.table","tidytable"))
 
   save(res, file = here::here("output","res_DMC_correlation.rds"))

@@ -2,57 +2,69 @@
 #'
 #' @param n_sub A single numeric value specifying for how many subjects data should be simulated.
 #' @param n_trials A single numeric value specifying how many trials per condition should be simulated.
-#' @param par_limits A data.frame containing two variables: min & max with 7 values
-#'   for each parameter of the DMC. You have to either include a third variable `par_name` labeling
+#' @param par_limits A data.frame containing two variables: min & max with 5 values
+#'   for each varying parameter of the DMC (muc, b, non_dec, tau, A).
+#'   You have to either include a third variable `par_name` labeling
 #'   which row contains information for which parameters or name the rows of the data frame.
-#'   Parameter names of the dmc parameters can be obtained via: `dRiftDM::dmc_dm()$free_prms`
+#' @param seed Optional random seed for reproducibility. If NULL, no seed is set.
 #'
 #' @export
-simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0) {
-  # set up model object
-  dmc_model <- dRiftDM::dmc_dm()
-  dmc_model <- dRiftDM::set_free_prms(dmc_model, c("muc","b", "non_dec", "tau", "A"))
-  dmc_model <- dRiftDM::set_model_prms(dmc_model,
-                                       new_prm_vals = c(
-                                         muc = 4, b = 0.6, non_dec = 0.3,
-                                         sd_non_dec = 0.002, tau = 0.04, a = 2, A = 0.1,
-                                         alpha = 500
-                                       ))
+simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0, seed = NULL) {
 
-  # prepare lower and upper bounds for parameters
+  # set up model object
+  dmc_model <- dRiftDM::dmc_dm(var_non_dec = FALSE, var_start = FALSE)
+
+  # prepare lower and upper bounds for ALL parameters
+  # For parameters that should vary: set different lower/upper
+  # For constant parameters: set same values (no variation)
   if (is.null(par_limits)) {
     # default settings
-    lower_limits <- c(1.5, .4, 0.15,0.02,0.015)
-    upper_limits <- c(5, .8, 0.5,0.12,0.40)
+    lower <- c(
+      muc = 1.5, b = 0.4, non_dec = 0.15,
+      tau = 0.02, A = 0.015
+    )
+    upper <- c(
+      muc = 5, b = 0.8, non_dec = 0.5,
+      tau = 0.12, A = 0.40
+    )
   } else {
-    if (all(dmc_model$free_prms %in% rownames(par_limits))) {
-      par_limits <- par_limits[dmc_model$free_prms,]
-      lower_limits <- par_limits$min
-      upper_limits <- par_limits$max
-    } else {
-      stop("par_limits does not contain limits for some paramters of the DMC.")
+    # Use custom limits for varying parameters
+    varying_pars <- c("muc", "b", "non_dec", "tau", "A")
+    if (!all(varying_pars %in% rownames(par_limits))) {
+      stop("par_limits does not contain limits for some parameters of the DMC.")
     }
+    lower <- c(
+      muc = par_limits["muc", "min"],
+      b = par_limits["b", "min"],
+      non_dec = par_limits["non_dec", "min"],
+      tau = par_limits["tau", "min"],
+      A = par_limits["A", "min"]
+    )
+    upper <- c(
+      muc = par_limits["muc", "max"],
+      b = par_limits["b", "max"],
+      non_dec = par_limits["non_dec", "max"],
+      tau = par_limits["tau", "max"],
+      A = par_limits["A", "max"]
+    )
   }
 
-  # simulate parameters for each subject
-  sub_parms = dRiftDM::simulate_values(
-    lower = lower_limits,
-    upper = upper_limits,
-    k = n_sub
-  )
-
-  # rename columns with parameter names
-  colnames(sub_parms)[1:5] = dmc_model$free_prms
-
-  # simulate data
-  sim_data = dRiftDM::simulate_data(
-    drift_dm_obj = dmc_model,
+  # simulate data directly using dRiftDM's simulate_data
+  # This function handles parameter simulation and data generation internally
+  data_prms <- dRiftDM::simulate_data(
+    object = dmc_model,
     n = n_trials,
-    df_prms = sub_parms,
-    verbose = verbose
+    k = n_sub,
+    lower = lower,
+    upper = upper,
+    seed = seed,
+    progress = verbose
   )
 
-  sim_data$task = 1
+  # Extract simulated parameters and data
+  sub_parms <- data_prms$prms
+  sim_data <- data_prms$synth_data
+  sim_data$task <- 1
 
   # collect information in list
   data_list <- list(

@@ -1,5 +1,6 @@
 library(SimDesign)
 library(ComputationalValidity)
+library(dRiftDM)
 
 # Set Up Design & Number of Replications per condition
 nReplications <- 250
@@ -10,18 +11,22 @@ Design <- createDesign(
 )
 
 # set up model object
-ssp_model <- dRiftDM::ssp_dm()
-ssp_model <- dRiftDM::set_free_prms(ssp_model, c("b", "non_dec", "p", "sd_0","r"))
+ssp_model <- dRiftDM::ssp_dm(var_non_dec = FALSE, var_start = FALSE)
+
+# Set parameters to estimate using flex_prms accessor
+fp <- dRiftDM::flex_prms(ssp_model)
+fp$prms_to_estimate <- c("b", "non_dec", "p", "sd_0")
+dRiftDM::flex_prms(ssp_model) <- fp
 
 # set parameter limits
 par_limits = data.frame(
   t(
-    rbind(c(.4, 0.15, 1, 0.5, 8),
-          c(.8, 0.50, 4, 2.0, 12))
+    rbind(c(.4, 0.15, 1, 0.5),
+          c(.8, 0.50, 4, 2.0))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- ssp_model$free_prms
+rownames(par_limits) <- dRiftDM::flex_prms(ssp_model)$prms_to_estimate
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {
@@ -36,14 +41,14 @@ Generate <- function(condition, fixed_objects = NULL) {
   dat
 }
 
-# dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
+dat <- Generate(condition = Design[1,], fixed_objects = list(par_limits = par_limits))
 
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_data(dat)
   ret
 }
 
-# ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
+ret <- Analyse(condition = Design[1,], dat = dat, fixed_objects = list(par_limits = par_limits))
 
 # the summary will be done separately to give us more flexibility
 Summarise <- function(condition, results, fixed_objects) {

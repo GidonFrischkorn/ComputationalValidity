@@ -10,7 +10,8 @@ simulate_correlation_dmc(
   correlation,
   correlated_par,
   par_limits = NULL,
-  verbose = 0
+  verbose = 0,
+  seed = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ simulate_correlation_dmc(
 for each parameter of the DMC. You have to either include a third variable `par_name` labeling
 which row contains information for which parameters or name the rows of the data frame.
 Parameter names of the dmc parameters can be obtained via: `dRiftDM::dmc_dm()$free_prms`}
+
+\item{seed}{Optional random seed for reproducibility. If NULL, no seed is set.}
 }
 \description{
 Simulate Data for the DMC
