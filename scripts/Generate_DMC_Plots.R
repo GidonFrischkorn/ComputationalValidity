@@ -82,7 +82,7 @@ cat("Generating Figure 1: Parameter Confounding Matrix (Difference & Mean Indica
 create_confound_matrix <- function(data, indicator_type, indicator_label) {
   recovery_wide <- data %>%
     filter(
-      genPar %in% c("A", "b", "muc", "non_dec", "tau"),
+      genPar %in% c("A", "tau", "b", "muc", "non_dec"),
       measure %in% c("RT", "PC"),
       indicator == indicator_type,
       SampleSize == "N = 100",
@@ -143,8 +143,6 @@ fig1 <- ggplot(confound_data_all, aes(x = Param1, y = Param2, fill = Correlation
   ) +
   facet_wrap(~ Indicator, ncol = 2) +
   labs(
-    title = "Parameter Confounding in Recovery",
-    subtitle = "Correlations between parameter recovery from behavioral indicators (N=100, 100 trials)",
     x = "",
     y = ""
   ) +
@@ -182,7 +180,7 @@ cat("Generating Figure 2: The Reliability Paradox...\n")
 # Get reliability of RT indicators (both difference and mean scores)
 reliability_recovery_data <- df_recovery_all %>%
   filter(
-    genPar %in% c("A", "muc", "tau"),  # Most interesting parameters
+    genPar %in% c("A", "tau", "muc"),  # Focus on key parameters
     measure == "RT",  # Parameter recovery from RT
     indicator %in% c("difference", "mean"),  # Compare difference and mean scores
     SampleSize == "N = 100"
@@ -207,8 +205,8 @@ fig2 <- ggplot(reliability_recovery_data,
              labeller = labeller(
                genPar = c(
                  "A" = "Amplitude (A)",
-                 "muc" = "Controlled drift (μc)",
-                 "tau" = "Temporal dynamics (τ)"
+                 "tau" = "Temporal Dynamics (τ)",
+                 "muc" = "Controlled drift (μc)"
                )
              ),
              scales = "free_x") +
@@ -221,8 +219,6 @@ fig2 <- ggplot(reliability_recovery_data,
     end = 0.8
   ) +
   labs(
-    title = "The Reliability Paradox",
-    subtitle = "High reliability doesn't guarantee parameter recovery",
     x = "Indicator Reliability",
     y = "Parameter Recovery (Correlation)"
   ) +
@@ -234,11 +230,11 @@ fig2 <- ggplot(reliability_recovery_data,
   )
 
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.png"),
-       fig2, width = 10, height = 10, dpi = 600)
+       fig2, width = 8, height = 12, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.pdf"),
-       fig2, width = 10, height = 10)
+       fig2, width = 8, height = 12)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.tiff"),
-       fig2, width = 10, height = 10, dpi = 600, compression = "lzw")
+       fig2, width = 8, height = 12, dpi = 600, compression = "lzw")
 
 # =============================================================================
 # FIGURE 3: Differential Indicator Validity
@@ -252,7 +248,7 @@ cat("Generating Figure 3: Differential Indicator Validity...\n")
 # Prepare data showing RT vs PC for key parameters, comparing difference vs mean scores
 recovery_differential <- df_recovery_all %>%
   filter(
-    genPar %in% c("A", "muc", "tau"),  # Focus on key conflict parameters
+    genPar %in% c("A", "tau", "muc"),  # Focus on key conflict parameters
     measure %in% c("RT", "PC"),
     indicator %in% c("difference", "mean"),  # Compare difference and mean scores
     SampleSize == "N = 100",
@@ -261,8 +257,8 @@ recovery_differential <- df_recovery_all %>%
   mutate(
     param_label = case_when(
       genPar == "A" ~ "Amplitude (A)\nAutomatic activation strength",
+      genPar == "tau" ~ "Temporal Dynamics (τ)\nAutomatic activation build-up",
       genPar == "muc" ~ "Controlled Drift (μc)\nControlled processing rate",
-      genPar == "tau" ~ "Temporal Dynamics (τ)\nActivation time course",
       TRUE ~ genPar
     ),
     indicator_label = case_when(
@@ -288,8 +284,6 @@ fig3 <- ggplot(recovery_differential,
     labels = c("RT" = "Response Time", "PC" = "Proportion Correct")
   ) +
   labs(
-    title = "Different Indicators Recover Different Parameters",
-    subtitle = "Model-based validation reveals indicator-specific construct validity (100 trials per condition, N=100)",
     x = "",
     y = "Parameter Recovery (Correlation)"
   ) +
@@ -336,29 +330,48 @@ correlation_transfer <- df_correlations_all %>%
     SampleSize == "N = 200",
     nTrials == "100",
     indicator == "difference",
-    measure %in% c("RT", "PC")
+    measure %in% c("RT", "PC"),
+    correlated_par %in% c("muc","A","tau","muc-A","muc-tau","A-tau")
   ) %>%
   mutate(
-    # Get the relevant generating parameter correlation
+    # Get the relevant conflict parameter correlation
+    # For single parameters: use that parameter's correlation
+    # For pairs: use average of the two conflict parameters' correlations
     gen_param_cor = case_when(
       correlated_par == "muc" ~ emp_corr.muc,
       correlated_par == "A" ~ emp_corr.A,
-      correlated_par == "muc-A-tau" ~ (emp_corr.muc + emp_corr.A + emp_corr.tau) / 3,
+      correlated_par == "tau" ~ emp_corr.tau,
+      correlated_par == "muc-A" ~ emp_corr.A,
+      correlated_par == "muc-tau" ~ emp_corr.tau,
+      correlated_par == "A-tau" ~ (emp_corr.A + emp_corr.tau) / 2,
       TRUE ~ NA_real_
     ),
     param_label = case_when(
       correlated_par == "muc" ~ "Controlled Drift (μc)",
       correlated_par == "A" ~ "Amplitude (A)",
-      correlated_par == "muc-A-tau" ~ "Multiple Parameters\n(μc, A, τ)",
+      correlated_par == "tau" ~ "Temporal Dynamics (τ)",
+      correlated_par == "muc-A" ~ "μc + A",
+      correlated_par == "muc-tau" ~ "μc + τ",
+      correlated_par == "A-tau" ~ "A + τ",
       TRUE ~ correlated_par
     ),
+    # Create row grouping for faceting
+    param_type = case_when(
+      correlated_par %in% c("A", "muc", "tau") ~ "Single Parameter",
+      TRUE ~ "Parameter Pairs"
+    ),
+    # Order for display
+    param_label = factor(param_label, levels = c(
+      "Amplitude (A)", "Controlled Drift (μc)", "Temporal Dynamics (τ)",
+      "μc + A", "μc + τ", "A + τ"
+    )),
     measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct")
   ) %>%
   filter(!is.na(gen_param_cor))
 
 fig4 <- ggplot(correlation_transfer,
                aes(x = gen_param_cor, y = correlation_corrected, color = measure_label)) +
-  facet_wrap(~ param_label, nrow = 1) +
+  facet_wrap(~ param_label, nrow = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
               color = "gray30", linewidth = 0.8) +
   geom_point(alpha = 0.4, size = 2) +
@@ -368,8 +381,6 @@ fig4 <- ggplot(correlation_transfer,
     values = c("Response Time" = "#E69F00", "Proportion Correct" = "#56B4E9")
   ) +
   labs(
-    title = "Correlation Transfer: The Limits of Indicator Validity",
-    subtitle = "Parameter correlations don't always transfer to behavioral indicators (N=200, 100 trials per condition)",
     x = "Generating Parameter Correlation",
     y = "Observed Indicator Correlation"
   ) +
@@ -399,7 +410,7 @@ cat("Generating Figure 5: Model-Guided Indicator Selection...\n")
 # Calculate recovery quality categories
 recovery_for_selection <- df_recovery_all %>%
   filter(
-    genPar %in% c("A", "muc", "tau"),
+    genPar %in% c("A", "tau", "muc"),
     measure %in% c("RT", "PC"),
     indicator %in% c("difference", "mean"),  # Include both scoring methods
     SampleSize == "N = 100",
@@ -417,8 +428,8 @@ recovery_for_selection <- df_recovery_all %>%
   mutate(
     param_label = case_when(
       genPar == "A" ~ "Amplitude",
-      genPar == "muc" ~ "Controlled Drift",
-      genPar == "tau" ~ "Temporal Dynamics"
+      genPar == "tau" ~ "Temporal Dynamics",
+      genPar == "muc" ~ "Controlled Drift"
     ),
     indicator_measure = case_when(
       indicator == "difference" & measure == "RT" ~ "RT Difference",
@@ -454,8 +465,6 @@ fig5 <- ggplot(recovery_for_selection,
     labels = c("0", "0.3", "0.5", "0.7", "1.0")
   ) +
   labs(
-    title = "Model-Guided Indicator Selection",
-    subtitle = "Use theoretical model to determine which indicators validly measure which constructs",
     x = "Target Construct (DMC Parameter)",
     y = "Candidate Behavioral Indicator"
   ) +
@@ -487,7 +496,7 @@ cat("Generating Figure 6: Intermediate Modeling...\n")
 # Prepare data comparing behavioral (RT/PC difference) vs ezDM parameters
 recovery_comparison <- df_recovery_all %>%
   filter(
-    genPar %in% c("A", "muc", "tau", "b", "non_dec"),
+    genPar %in% c("A", "tau", "b", "muc", "non_dec"),
     measure %in% c("RT", "PC", "drift", "boundary", "non_dec"),
     indicator %in% c("mean","difference"),
     SampleSize == "N = 100",
@@ -495,11 +504,11 @@ recovery_comparison <- df_recovery_all %>%
   ) %>%
   mutate(
     param_label = case_when(
-      genPar == "A" ~ "Amplitude",
-      genPar == "muc" ~ "Controlled Drift (μc)",
-      genPar == "tau" ~ "Temporal Dynamics (τ)",
+      genPar == "A" ~ "Amplitude (A)",
+      genPar == "tau" ~ "Temporal\nDynamics (τ)",
+      genPar == "muc" ~ "Controlled\nDrift (μc)",
       genPar == "b" ~ "Boundary (b)",
-      genPar == "non_dec" ~ "Non-Decision Time (t₀)",
+      genPar == "non_dec" ~ "Non-Decision\nTime (t₀)",
       TRUE ~ genPar
     ),
     measure_type = case_when(
@@ -549,8 +558,6 @@ fig6 <- ggplot(recovery_summary_comp,
     values = c("Behavioral" = "#E69F00", "ezDM" = "#56B4E9")
   ) +
   labs(
-    title = "Intermediate Modeling: ezDM vs Behavioral Indicators",
-    subtitle = "Simple models don't always outperform behavioral indicators (difference scores, N=100, 100 trials)",
     x = "",
     y = "Parameter Recovery (Correlation)"
   ) +
@@ -564,11 +571,11 @@ fig6 <- ggplot(recovery_summary_comp,
   )
 
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.png"),
-       fig6, width = 14, height = 5, dpi = 600)
+       fig6, width = 14, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.pdf"),
-       fig6, width = 14, height = 5)
+       fig6, width = 14, height = 8)
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.tiff"),
-       fig6, width = 14, height = 5, dpi = 600, compression = "lzw")
+       fig6, width = 14, height = 8, dpi = 600, compression = "lzw")
 
 # =============================================================================
 # Summary Statistics for Text
@@ -581,7 +588,7 @@ cat("===========================================================================
 cat("DIFFERENTIAL INDICATOR VALIDITY (N=100, 100 trials/condition):\n")
 differential_stats <- df_recovery_all %>%
   filter(
-    genPar %in% c("A", "muc", "tau"),
+    genPar %in% c("A", "tau", "muc"),
     measure %in% c("RT", "PC"),
     indicator == "difference",
     SampleSize == "N = 100",
@@ -598,8 +605,8 @@ differential_stats <- df_recovery_all %>%
   mutate(
     param_label = case_when(
       genPar == "A" ~ "Amplitude",
-      genPar == "muc" ~ "Controlled Drift",
-      genPar == "tau" ~ "Temporal Dynamics"
+      genPar == "tau" ~ "Temporal Dynamics",
+      genPar == "muc" ~ "Controlled Drift"
     ),
     indicator = ifelse(measure == "RT", "Response Time", "Accuracy")
   ) %>%
@@ -633,9 +640,11 @@ if (exists("reliability_recovery_data")) {
     ) %>%
     mutate(
       param_label = case_when(
-        genPar == "A" ~ "Amplitude",
+        genPar == "A" ~ "Amplitude (A)",
+      genPar == "tau" ~ "Temporal Dynamics (τ)",
         genPar == "muc" ~ "Controlled Drift",
-        genPar == "tau" ~ "Temporal Dynamics"
+        genPar == "b" ~ "Boundary",
+        genPar == "non_dec" ~ "Non-Decision Time"
       )
     )
   print(rel_rec_stats)

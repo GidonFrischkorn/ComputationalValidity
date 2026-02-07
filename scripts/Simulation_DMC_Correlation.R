@@ -60,12 +60,6 @@ Generate <- function(condition, fixed_objects = NULL) {
 
 # dat <- Generate(condition = Design[7,], fixed_objects = list(par_limits = par_limits, cor_limits = cor_limits))
 
-sub_pars <- dat$sub_parms %>%
-  pivot_wider(names_from = task, values_from = all_of(rownames(par_limits)), names_sep = "_")
-cor(sub_pars$A_1, sub_pars$A_2)
-cor(sub_pars$muc_1, sub_pars$muc_2)
-cor(sub_pars$tau_1, sub_pars$tau_2)
-
 Analyse <- function(condition, dat, fixed_objects) {
   ret <- analyze_correlation(dat)
   ret

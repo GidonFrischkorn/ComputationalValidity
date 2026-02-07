@@ -9,6 +9,12 @@
 #'
 #' @export
 analyze_data <- function(dat) {
+  # Add AUC composite parameter to generating parameters
+  # AUC = 2 * A * tau (area under Gamma activation curve)
+  if ("A" %in% colnames(dat$sub_parms) && "tau" %in% colnames(dat$sub_parms)) {
+    dat$sub_parms$AUC <- 2 * dat$sub_parms$A * dat$sub_parms$tau
+  }
+  
   # calculate descriptive performance indicators
   desc_performance <- get_descriptives(data = dat$sim_data)
 
@@ -28,7 +34,7 @@ analyze_data <- function(dat) {
   # reliability estimates
   reliability <- get_reliability(data = dat$sim_data)
 
-  # recovery of DMC parameters
+  # recovery of DMC parameters (now includes AUC)
   recovery <- get_parameter_recovery(all_performance, dat$sub_parms, df_reliability = reliability)
 
   return(list(recovery = recovery,

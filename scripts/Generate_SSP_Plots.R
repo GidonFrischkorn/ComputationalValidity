@@ -123,8 +123,6 @@ figS1 <- ggplot(confound_data_all_ssp, aes(x = Param1, y = Param2, fill = Correl
   ) +
   facet_wrap(~ Indicator, ncol = 2) +
   labs(
-    title = "SSP Parameter Confounding in Recovery",
-    subtitle = "Correlations between parameter recovery from behavioral indicators (N=100, 100 trials)",
     x = "",
     y = ""
   ) +
@@ -204,8 +202,6 @@ figS2 <- ggplot(reliability_recovery_data_ssp,
     end = 0.8
   ) +
   labs(
-    title = "SSP: The Reliability Paradox",
-    subtitle = "High reliability doesn't guarantee parameter recovery",
     x = "Indicator Reliability",
     y = "Parameter Recovery (Correlation)"
   ) +
@@ -265,8 +261,6 @@ figS3 <- ggplot(recovery_differential_ssp,
     labels = c("RT" = "Response Time", "PC" = "Proportion Correct")
   ) +
   labs(
-    title = "SSP: Different Indicators Recover Different Parameters",
-    subtitle = "Model-based validation reveals indicator-specific construct validity (100 trials per condition, N=100)",
     x = "",
     y = "Parameter Recovery (Correlation)"
   ) +
@@ -330,8 +324,6 @@ figS4 <- ggplot(correlation_transfer_ssp,
     values = c("Response Time" = "#E69F00", "Proportion Correct" = "#56B4E9")
   ) +
   labs(
-    title = "SSP: Correlation Transfer - The Limits of Indicator Validity",
-    subtitle = "Parameter correlations don't always transfer to behavioral indicators (N=200, 100 trials per condition)",
     x = "Generating Parameter Correlation",
     y = "Observed Indicator Correlation"
   ) +
@@ -410,8 +402,6 @@ figS5 <- ggplot(recovery_for_selection_ssp,
     labels = c("0", "0.3", "0.5", "0.7", "1.0")
   ) +
   labs(
-    title = "SSP: Model-Guided Indicator Selection",
-    subtitle = "Use theoretical model to determine which indicators validly measure which constructs",
     x = "Target Construct (SSP Parameter)",
     y = "Candidate Behavioral Indicator"
   ) +
@@ -498,12 +488,10 @@ figS6 <- ggplot(recovery_summary_comp_ssp,
     values = c("Behavioral" = "#E69F00", "ezDM" = "#56B4E9")
   ) +
   labs(
-    title = "SSP: Intermediate Modeling - ezDM vs Behavioral Indicators",
-    subtitle = "Simple models don't always outperform behavioral indicators (difference scores, N=100, 100 trials)",
     x = "",
     y = "Parameter Recovery (Correlation)"
   ) +
-  coord_cartesian(ylim = c(-0.5, 1)) +
+  coord_cartesian(ylim = c(-1, 1)) +
   theme_manuscript +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 9),

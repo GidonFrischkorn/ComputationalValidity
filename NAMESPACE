@@ -3,6 +3,7 @@
 export("%>%")
 export(analyze_correlation)
 export(analyze_data)
+export(calculate_auc)
 export(ez_dm)
 export(get_correlations)
 export(get_descriptives)

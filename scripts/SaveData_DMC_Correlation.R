@@ -144,7 +144,7 @@ dmc_correlation_behavior$nTrials <- factor(dmc_correlation_behavior$nTrials,
                                            levels = c("50","100","200"))
 
 dmc_correlation_behavior$correlated_par <- factor(dmc_correlation_behavior$correlated_par,
-                                                   levels = c("muc","A","muc-A-tau"))
+                                                   levels = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau"))
 
 # ezDM Results
 dmc_correlation_ezDM$measure <- factor(dmc_correlation_ezDM$measure,
@@ -163,7 +163,7 @@ dmc_correlation_ezDM$nTrials <- factor(dmc_correlation_ezDM$nTrials,
                                         levels = c("50","100","200"))
 
 dmc_correlation_ezDM$correlated_par <- factor(dmc_correlation_ezDM$correlated_par,
-                                               levels = c("muc","A","muc-A-tau"))
+                                               levels = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau"))
 
 # Reliability Results
 dmc_correlation_reliability$measure <- factor(dmc_correlation_reliability$measure,
@@ -182,7 +182,7 @@ dmc_correlation_reliability$nTrials <- factor(dmc_correlation_reliability$nTrial
                                     levels = c("50","100","200"))
 
 dmc_correlation_reliability$correlated_par <- factor(dmc_correlation_reliability$correlated_par,
-                                                      levels = c("muc","A","muc-A-tau"))
+                                                      levels = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau"))
 
 # Correlation Results
 dmc_correlation_recCorrs$measure <- factor(dmc_correlation_recCorrs$measure,
@@ -201,7 +201,7 @@ dmc_correlation_recCorrs$nTrials <- factor(dmc_correlation_recCorrs$nTrials,
                                             levels = c("50","100","200"))
 
 dmc_correlation_recCorrs$correlated_par <- factor(dmc_correlation_recCorrs$correlated_par,
-                                                   levels = c("muc","A","muc-A-tau"))
+                                                   levels = c("muc","A","tau","muc-A","muc-tau","A-tau","muc-A-tau"))
 
 # 3) Save to Package ---------------
 usethis::use_data(dmc_correlation_behavior, overwrite = TRUE, compress = "xz")

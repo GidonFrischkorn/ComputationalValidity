@@ -9,6 +9,28 @@
 #'
 #' @export
 analyze_correlation <- function(dat) {
+  # Add AUC composite parameter to generating parameters for both tasks
+  # AUC = 2 * A * tau (area under Gamma activation curve)
+  if ("A" %in% colnames(dat$sub_parms) && "tau" %in% colnames(dat$sub_parms)) {
+    dat$sub_parms$AUC <- 2 * dat$sub_parms$A * dat$sub_parms$tau
+    
+    # Also add AUC to empirical correlation if A or tau were correlated
+    if (!is.null(dat$empirical_correlation)) {
+      if ("A" %in% names(dat$empirical_correlation) || "tau" %in% names(dat$empirical_correlation)) {
+        # Calculate AUC for both tasks from the parameters
+        # Extract task indicators (assuming ID column exists and task column distinguishes tasks)
+        task1_indices <- which(dat$sub_parms$task == 1)
+        task2_indices <- which(dat$sub_parms$task == 2)
+        
+        if (length(task1_indices) > 0 && length(task2_indices) > 0) {
+          auc_task1 <- dat$sub_parms$AUC[task1_indices]
+          auc_task2 <- dat$sub_parms$AUC[task2_indices]
+          dat$empirical_correlation <- c(dat$empirical_correlation, AUC = cor(auc_task1, auc_task2))
+        }
+      }
+    }
+  }
+  
   # calculate descriptive performance indicators
   desc_performance <- get_descriptives(data = dat$sim_data)
 
