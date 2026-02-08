@@ -72,100 +72,105 @@ df_recovery_all <- df_recovery_all %>%
   left_join(avg_effects_all_rec)
 
 # =============================================================================
-# FIGURE 1: Parameter Confounding Matrix (Equifinality)
+# FIGURE 1: Equifinality & Model-Guided Indicator Selection
 # =============================================================================
-cat("Generating Figure 1: Parameter Confounding Matrix (Difference & Mean Indicators)...\n")
+cat("Generating Figure 1: Equifinality & Model-Guided Indicator Selection...\n")
 
-# Create confounding matrices for both difference and mean indicators
-# These are the most relevant behavioral indicators
+# PRIMARY FINDING: Demonstrates equifinality through selective recovery patterns
+# Shows ALL 5 parameters × 4 indicators to reveal:
+# 1. Each indicator only recovers SOME parameters (incomplete coverage)
+# 2. Different indicators needed for different constructs (selective sensitivity)
+# 3. Practical guidance: which indicators to use for which parameters
 
-create_confound_matrix <- function(data, indicator_type, indicator_label) {
-  recovery_wide <- data %>%
-    filter(
-      genPar %in% c("A", "tau", "b", "muc", "non_dec"),
-      measure %in% c("RT", "PC"),
-      indicator == indicator_type,
-      SampleSize == "N = 100",
-      nTrials == "100"
-    ) %>%
-    select(nRep, genPar, measure, rec) %>%
-    pivot_wider(
-      names_from = c(genPar, measure),
-      values_from = rec,
-      names_sep = "_"
-    )
-
-  # Calculate correlation matrix
-  param_cors <- cor(recovery_wide %>% select(-nRep), use = "pairwise.complete.obs")
-
-  # Create heatmap data
-  confound_data <- as.data.frame(as.table(param_cors))
-  names(confound_data) <- c("Param1", "Param2", "Correlation")
-
-  # Clean up parameter names for display
-  confound_data <- confound_data %>%
-    mutate(
-      Param1 = gsub("_", " (", Param1),
-      Param1 = paste0(Param1, ")"),
-      Param2 = gsub("_", " (", Param2),
-      Param2 = paste0(Param2, ")"),
-      Indicator = indicator_label
-    )
-
-  return(confound_data)
-}
-
-# Generate data for both indicators
-confound_diff <- create_confound_matrix(df_recovery_all, "difference", "Difference Scores\n(Incomp - Comp)")
-confound_mean <- create_confound_matrix(df_recovery_all, "mean", "Mean Scores\n(Average RT/PC)")
-
-# Combine data using rbind
-confound_data_all <- rbind(confound_diff, confound_mean)
-
-# Verify data structure
-cat(paste0("  Combined data rows: ", nrow(confound_data_all), "\n"))
-cat(paste0("  Unique Indicators: ", length(unique(confound_data_all$Indicator)), "\n"))
-cat(paste0("  Column class: ", class(confound_data_all$Indicator), "\n"))
-cat(paste0("  Column names: ", paste(names(confound_data_all), collapse=", "), "\n"))
+# Calculate recovery quality for ALL parameters and ALL indicators
+# Include 95% confidence intervals using bootstrap percentile method
+recovery_comprehensive <- df_recovery_all %>%
+  filter(
+    genPar %in% c("A", "tau", "muc", "b", "non_dec"),  # ALL 5 parameters
+    measure %in% c("RT", "PC"),
+    indicator %in% c("difference", "mean"),
+    SampleSize == "N = 100",
+    nTrials == "100"
+  ) %>%
+  group_by(genPar, measure, indicator) %>%
+  summarize(
+    median_rec = median(rec, na.rm = TRUE),
+    mean_rec = mean(rec, na.rm = TRUE),
+    ci_lower = quantile(rec, 0.025, na.rm = TRUE),
+    ci_upper = quantile(rec, 0.975, na.rm = TRUE),
+    q25 = quantile(rec, 0.25, na.rm = TRUE),
+    q75 = quantile(rec, 0.75, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    param_label = factor(
+      case_when(
+        genPar == "muc" ~ "Controlled Drift (μc)",
+        genPar == "tau" ~ "Temporal Dynamics (τ)",
+        genPar == "A" ~ "Amplitude (A)",
+        genPar == "b" ~ "Boundary (b)",
+        genPar == "non_dec" ~ "Non-Decision Time (Ter)"
+      ),
+      levels = c("Controlled Drift (μc)", "Temporal Dynamics (τ)", 
+                 "Amplitude (A)", "Boundary (b)", "Non-Decision Time (Ter)")
+    ),
+    indicator_measure = case_when(
+      indicator == "difference" & measure == "RT" ~ "RT Difference",
+      indicator == "difference" & measure == "PC" ~ "PC Difference",
+      indicator == "mean" & measure == "RT" ~ "RT Mean",
+      indicator == "mean" & measure == "PC" ~ "PC Mean"
+    ),
+    indicator_measure = factor(indicator_measure,
+                               levels = c("RT Difference", "PC Difference",
+                                         "RT Mean", "PC Mean")),
+    validity_strength = case_when(
+      abs(median_rec) > 0.5 ~ "Strong",
+      abs(median_rec) > 0.3 ~ "Moderate",
+      abs(median_rec) > 0.1 ~ "Weak",
+      TRUE ~ "None"
+    ),
+    validity_strength = factor(validity_strength,
+                               levels = c("None", "Weak", "Moderate", "Strong"))
+  )
 
 # Ensure directories exist
 dir.create(here("figures", "manuscript"), recursive = TRUE, showWarnings = FALSE)
 
-# Create faceted plot
-fig1 <- ggplot(confound_data_all, aes(x = Param1, y = Param2, fill = Correlation)) +
-  geom_tile(color = "white", linewidth = 0.5) +
-  geom_text(aes(label = sprintf("%.2f", Correlation)),
-            size = 2.5, color = "black") +
-  scale_fill_gradient2(
-    low = "#2166AC", mid = "white", high = "#B2182B",
-    midpoint = 0, limits = c(-1, 1),
-    name = "Correlation"
+# Create comprehensive heatmap showing selective recovery (equifinality)
+fig1 <- ggplot(recovery_comprehensive,
+               aes(x = param_label, y = indicator_measure, fill = abs(median_rec))) +
+  geom_tile(color = "white", linewidth = 1) +
+  geom_text(aes(label = sprintf("%.2f\n[%.2f, %.2f]\n(%s)", 
+                                median_rec, ci_lower, ci_upper, validity_strength)),
+            size = 3, fontface = "bold") +
+  scale_fill_gradientn(
+    colors = c("#D73027", "#FEE08B", "#1A9850"),
+    values = scales::rescale(c(0, 0.3, 1)),
+    limits = c(0, 1),
+    name = "Recovery\nStrength\n(|r|)",
+    breaks = c(0, 0.3, 0.5, 0.7, 1),
+    labels = c("0", "0.3", "0.5", "0.7", "1.0")
   ) +
-  facet_wrap(~ Indicator, ncol = 2) +
   labs(
-    x = "",
-    y = ""
+    x = "Target Construct (DMC Parameter)",
+    y = "Candidate Behavioral Indicator"
   ) +
   theme_manuscript +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 11, face = "bold", angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 11, face = "bold"),
+    axis.title = element_text(size = 12, face = "bold"),
     legend.position = "right",
-    plot.title = element_text(size = 14, face = "bold"),
-    plot.subtitle = element_text(size = 10),
-    strip.text = element_text(size = 11, face = "bold"),
-    strip.background = element_rect(fill = "gray90", color = "black")
+    panel.grid = element_blank()
   ) +
   coord_equal()
 
-cat("  Plot object created, attempting to save...\n")
-
-ggsave(here("figures", "manuscript", "DMC_Parameter_Confounding.png"),
-       fig1, width = 14, height = 7, dpi = 600)
-ggsave(here("figures", "manuscript", "DMC_Parameter_Confounding.pdf"),
-       fig1, width = 14, height = 7)
-ggsave(here("figures", "manuscript", "DMC_Parameter_Confounding.tiff"),
-       fig1, width = 14, height = 7, dpi = 600, compression = "lzw")
+ggsave(here("figures", "manuscript", "DMC_Equifinality.png"),
+       fig1, width = 12, height = 7, dpi = 600)
+ggsave(here("figures", "manuscript", "DMC_Equifinality.pdf"),
+       fig1, width = 12, height = 7)
+ggsave(here("figures", "manuscript", "DMC_Equifinality.tiff"),
+       fig1, width = 12, height = 7, dpi = 600, compression = "lzw")
 
 cat("  Figure 1 saved successfully!\n")
 
@@ -174,8 +179,8 @@ cat("  Figure 1 saved successfully!\n")
 # =============================================================================
 cat("Generating Figure 2: The Reliability Paradox...\n")
 
-# For Figure 2, we want to show that high INDICATOR reliability doesn't guarantee
-# parameter recovery. Compare difference vs mean scores for RT indicators.
+# THIRD FINDING: High INDICATOR reliability doesn't guarantee parameter recovery
+# Shows that the reliability-validity link is not necessary
 
 # Get reliability of RT indicators (both difference and mean scores)
 reliability_recovery_data <- df_recovery_all %>%
@@ -236,74 +241,7 @@ ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.pdf"),
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.tiff"),
        fig2, width = 8, height = 12, dpi = 600, compression = "lzw")
 
-# =============================================================================
-# FIGURE 3: Differential Indicator Validity
-# =============================================================================
-cat("Generating Figure 3: Differential Indicator Validity...\n")
-
-# KEY FIGURE: Shows that different indicators recover different parameters
-# This demonstrates the central thesis - model-based validation reveals
-# which indicators are valid for which theoretical constructs
-
-# Prepare data showing RT vs PC for key parameters, comparing difference vs mean scores
-recovery_differential <- df_recovery_all %>%
-  filter(
-    genPar %in% c("A", "tau", "muc"),  # Focus on key conflict parameters
-    measure %in% c("RT", "PC"),
-    indicator %in% c("difference", "mean"),  # Compare difference and mean scores
-    SampleSize == "N = 100",
-    nTrials == "100"  # Focus on one condition for clarity
-  ) %>%
-  mutate(
-    param_label = case_when(
-      genPar == "A" ~ "Amplitude (A)\nAutomatic activation strength",
-      genPar == "tau" ~ "Temporal Dynamics (τ)\nAutomatic activation build-up",
-      genPar == "muc" ~ "Controlled Drift (μc)\nControlled processing rate",
-      TRUE ~ genPar
-    ),
-    indicator_label = case_when(
-      indicator == "difference" ~ "Difference Score\n(Incomp - Comp)",
-      indicator == "mean" ~ "Mean Score\n(Average)",
-      TRUE ~ indicator
-    )
-  )
-
-fig3 <- ggplot(recovery_differential,
-               aes(x = param_label, y = rec, fill = measure)) +
-  facet_grid(indicator_label ~ ., scales = "free_y") +
-  geom_hline(yintercept = 0, linetype = "solid", color = "gray60", linewidth = 0.8) +
-  geom_hline(yintercept = c(-0.7, -0.5, -0.3, 0.3, 0.5, 0.7), linetype = "dashed",
-             color = "gray40", alpha = 0.4) +
-  geom_violin(position = position_dodge(width = 0.9), alpha = 0.6,
-              draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_boxplot(position = position_dodge(width = 0.9), width = 0.2,
-               alpha = 0.8, outlier.alpha = 0.3, show.legend = FALSE) +
-  scale_fill_manual(
-    name = "Behavioral Indicator",
-    values = c("RT" = "#E69F00", "PC" = "#56B4E9"),
-    labels = c("RT" = "Response Time", "PC" = "Proportion Correct")
-  ) +
-  labs(
-    x = "",
-    y = "Parameter Recovery (Correlation)"
-  ) +
-  coord_cartesian(ylim = c(-1, 1)) +
-  theme_manuscript +
-  theme(
-    axis.text.x = element_text(size = 10, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title = element_text(size = 11, face = "bold"),
-    legend.text = element_text(size = 10),
-    strip.text.y = element_text(size = 11, face = "bold"),
-    strip.background = element_rect(fill = "gray90", color = "black")
-  )
-
-ggsave(here("figures", "manuscript", "DMC_Differential_Validity.png"),
-       fig3, width = 10, height = 10, dpi = 600)
-ggsave(here("figures", "manuscript", "DMC_Differential_Validity.pdf"),
-       fig3, width = 10, height = 10)
-ggsave(here("figures", "manuscript", "DMC_Differential_Validity.tiff"),
-       fig3, width = 10, height = 10, dpi = 600, compression = "lzw")
+cat("  Figure 2 saved successfully!\n")
 
 # =============================================================================
 # PART 2: CORRELATION SIMULATION - Nuanced Perspective
@@ -317,9 +255,9 @@ data(dmc_correlation_recCorrs, package = "ComputationalValidity")
 df_correlations_all <- data.table(dmc_correlation_recCorrs)
 
 # =============================================================================
-# FIGURE 4: Correlation Transfer - The Limits of Validity
+# FIGURE 3: Correlation Transfer - The Limits of Validity
 # =============================================================================
-cat("Generating Figure 4: Correlation Transfer...\n")
+cat("Generating Figure 3: Correlation Transfer...\n")
 
 # This figure provides nuance: valid indicators don't always track parameter correlations
 # This is important for understanding the LIMITS of indicator validity
@@ -369,7 +307,7 @@ correlation_transfer <- df_correlations_all %>%
   ) %>%
   filter(!is.na(gen_param_cor))
 
-fig4 <- ggplot(correlation_transfer,
+fig3 <- ggplot(correlation_transfer,
                aes(x = gen_param_cor, y = correlation_corrected, color = measure_label)) +
   facet_wrap(~ param_label, nrow = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
@@ -392,103 +330,18 @@ fig4 <- ggplot(correlation_transfer,
   )
 
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.png"),
-       fig4, width = 13, height = 5, dpi = 600)
+       fig3, width = 13, height = 5, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.pdf"),
-       fig4, width = 13, height = 5)
+       fig3, width = 13, height = 5)
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.tiff"),
-       fig4, width = 13, height = 5, dpi = 600, compression = "lzw")
+       fig3, width = 13, height = 5, dpi = 600, compression = "lzw")
+
+cat("  Figure 3 saved successfully!\n")
 
 # =============================================================================
-# FIGURE 5: Model-Guided Indicator Selection
+# FIGURE 4: Intermediate Modeling - ezDM vs Behavioral Indicators
 # =============================================================================
-cat("Generating Figure 5: Model-Guided Indicator Selection...\n")
-
-# This figure shows HOW to use model-based validation to select indicators
-# Shows the same data as Figure 3 but organized to emphasize decision-making
-# Include both difference and mean scores to show differential validity
-
-# Calculate recovery quality categories
-recovery_for_selection <- df_recovery_all %>%
-  filter(
-    genPar %in% c("A", "tau", "muc"),
-    measure %in% c("RT", "PC"),
-    indicator %in% c("difference", "mean"),  # Include both scoring methods
-    SampleSize == "N = 100",
-    nTrials == "100"
-  ) %>%
-  group_by(genPar, measure, indicator) %>%
-  summarize(
-    median_rec = median(rec, na.rm = TRUE),
-    q25 = quantile(rec, 0.25, na.rm = TRUE),
-    q75 = quantile(rec, 0.75, na.rm = TRUE),
-    prop_positive = mean(rec > 0, na.rm = TRUE),
-    prop_strong = mean(rec > 0.5, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  mutate(
-    param_label = case_when(
-      genPar == "A" ~ "Amplitude",
-      genPar == "tau" ~ "Temporal Dynamics",
-      genPar == "muc" ~ "Controlled Drift"
-    ),
-    indicator_measure = case_when(
-      indicator == "difference" & measure == "RT" ~ "RT Difference",
-      indicator == "difference" & measure == "PC" ~ "PC Difference",
-      indicator == "mean" & measure == "RT" ~ "RT Mean",
-      indicator == "mean" & measure == "PC" ~ "PC Mean"
-    ),
-    indicator_measure = factor(indicator_measure,
-                               levels = c("RT Difference", "PC Difference",
-                                         "RT Mean", "PC Mean")),
-    validity_strength = case_when(
-      abs(median_rec) > 0.5 ~ "Strong",
-      abs(median_rec) > 0.3 ~ "Moderate",
-      abs(median_rec) > 0.1 ~ "Weak",
-      TRUE ~ "None"
-    ),
-    validity_strength = factor(validity_strength,
-                               levels = c("None", "Weak", "Moderate", "Strong"))
-  )
-
-# Create decision matrix heatmap
-fig5 <- ggplot(recovery_for_selection,
-               aes(x = param_label, y = indicator_measure, fill = abs(median_rec))) +
-  geom_tile(color = "white", linewidth = 1) +
-  geom_text(aes(label = sprintf("%.2f\n(%s)", median_rec, validity_strength)),
-            size = 3.5, fontface = "bold") +
-  scale_fill_gradientn(
-    colors = c("#D73027", "#FEE08B", "#1A9850"),
-    values = scales::rescale(c(0, 0.3, 1)),
-    limits = c(0, 1),
-    name = "Recovery\nStrength\n(|r|)",
-    breaks = c(0, 0.3, 0.5, 0.7, 1),
-    labels = c("0", "0.3", "0.5", "0.7", "1.0")
-  ) +
-  labs(
-    x = "Target Construct (DMC Parameter)",
-    y = "Candidate Behavioral Indicator"
-  ) +
-  theme_manuscript +
-  theme(
-    axis.text.x = element_text(size = 12, face = "bold"),
-    axis.text.y = element_text(size = 11, face = "bold"),
-    axis.title = element_text(size = 12, face = "bold"),
-    legend.position = "right",
-    panel.grid = element_blank()
-  ) +
-  coord_equal()
-
-ggsave(here("figures", "manuscript", "DMC_Model_Guided_Selection.png"),
-       fig5, width = 10, height = 7, dpi = 600)
-ggsave(here("figures", "manuscript", "DMC_Model_Guided_Selection.pdf"),
-       fig5, width = 10, height = 7)
-ggsave(here("figures", "manuscript", "DMC_Model_Guided_Selection.tiff"),
-       fig5, width = 10, height = 7, dpi = 600, compression = "lzw")
-
-# =============================================================================
-# FIGURE 6: Intermediate Modeling - ezDM vs Behavioral Indicators
-# =============================================================================
-cat("Generating Figure 6: Intermediate Modeling...\n")
+cat("Generating Figure 4: Intermediate Modeling...\n")
 
 # This figure shows that intermediate models (ezDM) don't always outperform
 # behavioral indicators. ezDM is better for some parameters but not all.
@@ -539,7 +392,7 @@ recovery_summary_comp <- recovery_comparison %>%
   )
 
 # Create grouped comparison plot
-fig6 <- ggplot(recovery_summary_comp,
+fig4 <- ggplot(recovery_summary_comp,
                aes(x = measure_label, y = median_rec, fill = measure_type)) +
   facet_grid(indicator ~ param_label, scales = "free_x") +
   geom_hline(yintercept = 0, linetype = "solid", color = "gray60", linewidth = 0.8) +
@@ -571,11 +424,13 @@ fig6 <- ggplot(recovery_summary_comp,
   )
 
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.png"),
-       fig6, width = 14, height = 8, dpi = 600)
+       fig4, width = 14, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.pdf"),
-       fig6, width = 14, height = 8)
+       fig4, width = 14, height = 8)
 ggsave(here("figures", "manuscript", "DMC_Intermediate_Modeling.tiff"),
-       fig6, width = 14, height = 8, dpi = 600, compression = "lzw")
+       fig4, width = 14, height = 8, dpi = 600, compression = "lzw")
+
+cat("  Figure 4 saved successfully!\n")
 
 # =============================================================================
 # Summary Statistics for Text

@@ -70,85 +70,113 @@ data(ssp_correlation_recCorrs, package = "ComputationalValidity")
 df_correlations_ssp <- data.table(ssp_correlation_recCorrs)
 
 # =============================================================================
-# FIGURE S1: SSP Parameter Confounding Matrix
+# FIGURE S1: SSP Equifinality & Model-Guided Indicator Selection
 # =============================================================================
-cat("Generating SSP Figure S1: Parameter Confounding Matrix...\n")
+cat("Generating SSP Figure S1: Equifinality & Model-Guided Indicator Selection...\n")
 
-create_confound_matrix <- function(data, indicator_type, indicator_label) {
-  recovery_wide <- data %>%
-    filter(
-      genPar %in% c("b", "non_dec", "p", "sd_0"),
-      measure %in% c("RT", "PC"),
-      indicator == indicator_type,
-      SampleSize == "N = 100",
-      nTrials == "100"
-    ) %>%
-    select(nRep, genPar, measure, rec) %>%
-    pivot_wider(
-      names_from = c(genPar, measure),
-      values_from = rec,
-      names_sep = "_"
-    )
+# PRIMARY FINDING: Demonstrates equifinality through selective recovery patterns
+# Shows ALL 4 SSP parameters × 4 indicators to reveal:
+# 1. Each indicator only recovers SOME parameters (incomplete coverage)
+# 2. Different indicators needed for different constructs (selective sensitivity)
+# 3. Practical guidance: which indicators to use for which parameters
+# Parallel to DMC Figure 1
 
-  param_cors <- cor(recovery_wide %>% select(-nRep), use = "pairwise.complete.obs")
+# Calculate recovery quality for ALL SSP parameters and ALL indicators
+# Include 95% confidence intervals
+recovery_comprehensive_ssp <- df_recovery_ssp %>%
+  filter(
+    genPar %in% c("b", "p", "sd_0", "non_dec"),  # ALL 4 SSP parameters
+    measure %in% c("RT", "PC"),
+    indicator %in% c("difference", "mean"),
+    SampleSize == "N = 100",
+    nTrials == "100"
+  ) %>%
+  group_by(genPar, measure, indicator) %>%
+  summarize(
+    median_rec = median(rec, na.rm = TRUE),
+    mean_rec = mean(rec, na.rm = TRUE),
+    ci_lower = quantile(rec, 0.025, na.rm = TRUE),
+    ci_upper = quantile(rec, 0.975, na.rm = TRUE),
+    q25 = quantile(rec, 0.25, na.rm = TRUE),
+    q75 = quantile(rec, 0.75, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    param_label = factor(
+      case_when(
+        genPar == "p" ~ "Perceptual Input (p)",
+        genPar == "sd_0" ~ "Initial Noise (σ₀)",
+        genPar == "b" ~ "Boundary (b)",
+        genPar == "non_dec" ~ "Non-Decision Time (Ter)"
+      ),
+      levels = c("Perceptual Input (p)", "Initial Noise (σ₀)", 
+                 "Boundary (b)", "Non-Decision Time (Ter)")
+    ),
+    indicator_measure = case_when(
+      indicator == "difference" & measure == "RT" ~ "RT Difference",
+      indicator == "difference" & measure == "PC" ~ "PC Difference",
+      indicator == "mean" & measure == "RT" ~ "RT Mean",
+      indicator == "mean" & measure == "PC" ~ "PC Mean"
+    ),
+    indicator_measure = factor(indicator_measure,
+                               levels = c("RT Difference", "PC Difference",
+                                         "RT Mean", "PC Mean")),
+    validity_strength = case_when(
+      abs(median_rec) > 0.5 ~ "Strong",
+      abs(median_rec) > 0.3 ~ "Moderate",
+      abs(median_rec) > 0.1 ~ "Weak",
+      TRUE ~ "None"
+    ),
+    validity_strength = factor(validity_strength,
+                               levels = c("None", "Weak", "Moderate", "Strong"))
+  )
 
-  confound_data <- as.data.frame(as.table(param_cors))
-  names(confound_data) <- c("Param1", "Param2", "Correlation")
-
-  confound_data <- confound_data %>%
-    mutate(
-      Param1 = gsub("_", " (", Param1),
-      Param1 = paste0(Param1, ")"),
-      Param2 = gsub("_", " (", Param2),
-      Param2 = paste0(Param2, ")"),
-      Indicator = indicator_label
-    )
-
-  return(confound_data)
-}
-
-confound_diff_ssp <- create_confound_matrix(df_recovery_ssp, "difference", "Difference Scores\n(Incomp - Comp)")
-confound_mean_ssp <- create_confound_matrix(df_recovery_ssp, "mean", "Mean Scores\n(Average RT/PC)")
-
-confound_data_all_ssp <- rbind(confound_diff_ssp, confound_mean_ssp)
-
-figS1 <- ggplot(confound_data_all_ssp, aes(x = Param1, y = Param2, fill = Correlation)) +
-  geom_tile(color = "white", linewidth = 0.5) +
-  geom_text(aes(label = sprintf("%.2f", Correlation)),
-            size = 2.5, color = "black") +
-  scale_fill_gradient2(
-    low = "#2166AC", mid = "white", high = "#B2182B",
-    midpoint = 0, limits = c(-1, 1),
-    name = "Correlation"
+# Create comprehensive heatmap showing selective recovery (equifinality)
+figS1 <- ggplot(recovery_comprehensive_ssp,
+               aes(x = param_label, y = indicator_measure, fill = abs(median_rec))) +
+  geom_tile(color = "white", linewidth = 1) +
+  geom_text(aes(label = sprintf("%.2f\n[%.2f, %.2f]\n(%s)", 
+                                median_rec, ci_lower, ci_upper, validity_strength)),
+            size = 3, fontface = "bold") +
+  scale_fill_gradientn(
+    colors = c("#D73027", "#FEE08B", "#1A9850"),
+    values = scales::rescale(c(0, 0.3, 1)),
+    limits = c(0, 1),
+    name = "Recovery\nStrength\n(|r|)",
+    breaks = c(0, 0.3, 0.5, 0.7, 1),
+    labels = c("0", "0.3", "0.5", "0.7", "1.0")
   ) +
-  facet_wrap(~ Indicator, ncol = 2) +
   labs(
-    x = "",
-    y = ""
+    x = "Target Construct (SSP Parameter)",
+    y = "Candidate Behavioral Indicator"
   ) +
   theme_manuscript +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 11, face = "bold", angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 11, face = "bold"),
+    axis.title = element_text(size = 12, face = "bold"),
     legend.position = "right",
-    plot.title = element_text(size = 14, face = "bold"),
-    plot.subtitle = element_text(size = 10),
-    strip.text = element_text(size = 11, face = "bold"),
-    strip.background = element_rect(fill = "gray90", color = "black")
+    panel.grid = element_blank()
   ) +
   coord_equal()
 
-ggsave(here("figures", "manuscript", "SSP_Parameter_Confounding.png"),
-       figS1, width = 14, height = 7, dpi = 600)
-ggsave(here("figures", "manuscript", "SSP_Parameter_Confounding.pdf"),
-       figS1, width = 14, height = 7)
-ggsave(here("figures", "manuscript", "SSP_Parameter_Confounding.tiff"),
-       figS1, width = 14, height = 7, dpi = 600, compression = "lzw")
+ggsave(here("figures", "manuscript", "SSP_Equifinality.png"),
+       figS1, width = 11, height = 7, dpi = 600)
+ggsave(here("figures", "manuscript", "SSP_Equifinality.pdf"),
+       figS1, width = 11, height = 7)
+ggsave(here("figures", "manuscript", "SSP_Equifinality.tiff"),
+       figS1, width = 11, height = 7, dpi = 600, compression = "lzw")
+
+cat("  Figure S1 saved successfully!\n")
 
 # =============================================================================
 # FIGURE S2: SSP Reliability Paradox
 # =============================================================================
 cat("Generating SSP Figure S2: Reliability Paradox...\n")
+
+# SECOND FINDING: Reliability-validity dissociation
+# High reliability does not guarantee parameter recovery
+# Parallel to DMC Figure 2
 
 reliability_recovery_data_ssp <- df_recovery_ssp %>%
   filter(
@@ -173,7 +201,7 @@ reliability_recovery_data_ssp <- df_recovery_ssp %>%
       rename(indicator_short = indicator),
     by = c("nRep", "SampleSize", "nTrials", "indicator_short")
   ) %>%
-  filter(!is.na(reliability)) %>%  # Remove rows without reliability data
+  filter(!is.na(reliability)) %>%
   mutate(
     indicator_label = case_when(
       indicator == "difference" ~ "Difference Score\n(Incomp - Comp)",
@@ -213,79 +241,18 @@ figS2 <- ggplot(reliability_recovery_data_ssp,
   )
 
 ggsave(here("figures", "manuscript", "SSP_Reliability_Paradox.png"),
-       figS2, width = 10, height = 10, dpi = 600)
+       figS2, width = 12, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "SSP_Reliability_Paradox.pdf"),
-       figS2, width = 10, height = 10)
+       figS2, width = 12, height = 8)
 ggsave(here("figures", "manuscript", "SSP_Reliability_Paradox.tiff"),
-       figS2, width = 10, height = 10, dpi = 600, compression = "lzw")
+       figS2, width = 12, height = 8, dpi = 600, compression = "lzw")
+
+cat("  Figure S2 saved successfully!\n")
 
 # =============================================================================
-# FIGURE S3: SSP Differential Indicator Validity
+# FIGURE S3: SSP Correlation Transfer
 # =============================================================================
-cat("Generating SSP Figure S3: Differential Indicator Validity...\n")
-
-recovery_differential_ssp <- df_recovery_ssp %>%
-  filter(
-    genPar %in% c("b", "p", "sd_0"),
-    measure %in% c("RT", "PC"),
-    indicator %in% c("difference", "mean"),
-    SampleSize == "N = 100",
-    nTrials == "100"
-  ) %>%
-  mutate(
-    param_label = case_when(
-      genPar == "b" ~ "Boundary (b)\nResponse caution",
-      genPar == "p" ~ "Perceptual Input (p)\nStimulus strength",
-      genPar == "sd_0" ~ "Initial Noise (sd_0)\nStarting point variability",
-      TRUE ~ genPar
-    ),
-    indicator_label = case_when(
-      indicator == "difference" ~ "Difference Score\n(Incomp - Comp)",
-      indicator == "mean" ~ "Mean Score\n(Average)",
-      TRUE ~ indicator
-    )
-  )
-
-figS3 <- ggplot(recovery_differential_ssp,
-               aes(x = param_label, y = rec, fill = measure)) +
-  facet_grid(indicator_label ~ ., scales = "free_y") +
-  geom_hline(yintercept = 0, linetype = "solid", color = "gray60", linewidth = 0.8) +
-  geom_hline(yintercept = c(-0.7, -0.5, -0.3, 0.3, 0.5, 0.7), linetype = "dashed",
-             color = "gray40", alpha = 0.4) +
-  geom_violin(position = position_dodge(width = 0.9), alpha = 0.6) +
-  geom_boxplot(position = position_dodge(width = 0.9), width = 0.2,
-               alpha = 0.8, outlier.alpha = 0.3, show.legend = FALSE) +
-  scale_fill_manual(
-    name = "Behavioral Indicator",
-    values = c("RT" = "#E69F00", "PC" = "#56B4E9"),
-    labels = c("RT" = "Response Time", "PC" = "Proportion Correct")
-  ) +
-  labs(
-    x = "",
-    y = "Parameter Recovery (Correlation)"
-  ) +
-  coord_cartesian(ylim = c(-1, 1)) +
-  theme_manuscript +
-  theme(
-    axis.text.x = element_text(size = 10, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title = element_text(size = 11, face = "bold"),
-    legend.text = element_text(size = 10),
-    strip.text.y = element_text(size = 11, face = "bold"),
-    strip.background = element_rect(fill = "gray90", color = "black")
-  )
-
-ggsave(here("figures", "manuscript", "SSP_Differential_Validity.png"),
-       figS3, width = 10, height = 10, dpi = 600)
-ggsave(here("figures", "manuscript", "SSP_Differential_Validity.pdf"),
-       figS3, width = 10, height = 10)
-ggsave(here("figures", "manuscript", "SSP_Differential_Validity.tiff"),
-       figS3, width = 10, height = 10, dpi = 600, compression = "lzw")
-
-# =============================================================================
-# FIGURE S4: SSP Correlation Transfer
-# =============================================================================
-cat("Generating SSP Figure S4: Correlation Transfer...\n")
+cat("Generating SSP Figure S3: Correlation Transfer...\n")
 
 correlation_transfer_ssp <- df_correlations_ssp %>%
   filter(
@@ -312,7 +279,7 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
   ) %>%
   filter(!is.na(gen_param_cor))
 
-figS4 <- ggplot(correlation_transfer_ssp,
+figS3 <- ggplot(correlation_transfer_ssp,
                aes(x = gen_param_cor, y = correlation, color = measure_label)) +
   facet_wrap(~ param_label, nrow = 1) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
@@ -335,97 +302,20 @@ figS4 <- ggplot(correlation_transfer_ssp,
   )
 
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.png"),
-       figS4, width = 13, height = 5, dpi = 600)
+       figS3, width = 13, height = 5, dpi = 600)
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.pdf"),
-       figS4, width = 13, height = 5)
+       figS3, width = 13, height = 5)
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.tiff"),
-       figS4, width = 13, height = 5, dpi = 600, compression = "lzw")
+       figS3, width = 13, height = 5, dpi = 600, compression = "lzw")
+
+cat("  Figure S3 saved successfully!\n")
 
 # =============================================================================
-# FIGURE S5: SSP Model-Guided Indicator Selection
+# FIGURE S4: SSP Intermediate Modeling
 # =============================================================================
-cat("Generating SSP Figure S5: Model-Guided Indicator Selection...\n")
-
-recovery_for_selection_ssp <- df_recovery_ssp %>%
-  filter(
-    genPar %in% c("b", "p", "sd_0"),
-    measure %in% c("RT", "PC"),
-    indicator %in% c("difference", "mean"),
-    SampleSize == "N = 100",
-    nTrials == "100"
-  ) %>%
-  group_by(genPar, measure, indicator) %>%
-  summarize(
-    median_rec = median(rec, na.rm = TRUE),
-    q25 = quantile(rec, 0.25, na.rm = TRUE),
-    q75 = quantile(rec, 0.75, na.rm = TRUE),
-    prop_positive = mean(rec > 0, na.rm = TRUE),
-    prop_strong = mean(rec > 0.5, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  mutate(
-    param_label = case_when(
-      genPar == "b" ~ "Boundary",
-      genPar == "p" ~ "Perceptual Input",
-      genPar == "sd_0" ~ "Initial Noise"
-    ),
-    indicator_measure = case_when(
-      indicator == "difference" & measure == "RT" ~ "RT Difference",
-      indicator == "difference" & measure == "PC" ~ "PC Difference",
-      indicator == "mean" & measure == "RT" ~ "RT Mean",
-      indicator == "mean" & measure == "PC" ~ "PC Mean"
-    ),
-    indicator_measure = factor(indicator_measure,
-                               levels = c("RT Difference", "PC Difference",
-                                         "RT Mean", "PC Mean")),
-    validity_strength = case_when(
-      abs(median_rec) > 0.5 ~ "Strong",
-      abs(median_rec) > 0.3 ~ "Moderate",
-      abs(median_rec) > 0.1 ~ "Weak",
-      TRUE ~ "None"
-    ),
-    validity_strength = factor(validity_strength,
-                               levels = c("None", "Weak", "Moderate", "Strong"))
-  )
-
-figS5 <- ggplot(recovery_for_selection_ssp,
-               aes(x = param_label, y = indicator_measure, fill = abs(median_rec))) +
-  geom_tile(color = "white", linewidth = 1) +
-  geom_text(aes(label = sprintf("%.2f\n(%s)", median_rec, validity_strength)),
-            size = 3.5, fontface = "bold") +
-  scale_fill_gradientn(
-    colors = c("#D73027", "#FEE08B", "#1A9850"),
-    values = scales::rescale(c(0, 0.3, 1)),
-    limits = c(0, 1),
-    name = "Recovery\nStrength\n(|r|)",
-    breaks = c(0, 0.3, 0.5, 0.7, 1),
-    labels = c("0", "0.3", "0.5", "0.7", "1.0")
-  ) +
-  labs(
-    x = "Target Construct (SSP Parameter)",
-    y = "Candidate Behavioral Indicator"
-  ) +
-  theme_manuscript +
-  theme(
-    axis.text.x = element_text(size = 12, face = "bold"),
-    axis.text.y = element_text(size = 11, face = "bold"),
-    axis.title = element_text(size = 12, face = "bold"),
-    legend.position = "right",
-    panel.grid = element_blank()
-  ) +
-  coord_equal()
-
-ggsave(here("figures", "manuscript", "SSP_Model_Guided_Selection.png"),
-       figS5, width = 10, height = 7, dpi = 600)
-ggsave(here("figures", "manuscript", "SSP_Model_Guided_Selection.pdf"),
-       figS5, width = 10, height = 7)
-ggsave(here("figures", "manuscript", "SSP_Model_Guided_Selection.tiff"),
-       figS5, width = 10, height = 7, dpi = 600, compression = "lzw")
-
+# FIGURE S4: SSP Intermediate Modeling
 # =============================================================================
-# FIGURE S6: SSP Intermediate Modeling
-# =============================================================================
-cat("Generating SSP Figure S6: Intermediate Modeling...\n")
+cat("Generating SSP Figure S4: Intermediate Modeling...\n")
 
 recovery_comparison_ssp <- df_recovery_ssp %>%
   filter(
@@ -469,7 +359,7 @@ recovery_summary_comp_ssp <- recovery_comparison_ssp %>%
     .groups = "drop"
   )
 
-figS6 <- ggplot(recovery_summary_comp_ssp,
+figS4 <- ggplot(recovery_summary_comp_ssp,
                aes(x = measure_label, y = median_rec, fill = measure_type)) +
   facet_wrap(~ param_label, nrow = 1, scales = "free_x") +
   geom_hline(yintercept = 0, linetype = "solid", color = "gray60", linewidth = 0.8) +
@@ -501,11 +391,13 @@ figS6 <- ggplot(recovery_summary_comp_ssp,
   )
 
 ggsave(here("figures", "manuscript", "SSP_Intermediate_Modeling.png"),
-       figS6, width = 14, height = 5, dpi = 600)
+       figS4, width = 14, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "SSP_Intermediate_Modeling.pdf"),
-       figS6, width = 14, height = 5)
+       figS4, width = 14, height = 8)
 ggsave(here("figures", "manuscript", "SSP_Intermediate_Modeling.tiff"),
-       figS6, width = 14, height = 5, dpi = 600, compression = "lzw")
+       figS4, width = 14, height = 8, dpi = 600, compression = "lzw")
+
+cat("  Figure S4 saved successfully!\n")
 
 # =============================================================================
 # Summary Statistics for SSP
@@ -545,16 +437,6 @@ reliability_stats_ssp <- reliability_recovery_data_ssp %>%
     .groups = "drop"
   )
 print(reliability_stats_ssp)
-
-# Model-guided selection statistics
-cat("\n\nSSP MODEL-GUIDED INDICATOR SELECTION (N=100, 100 trials/condition):\n")
-cat("Best indicators for each parameter:\n")
-best_indicators_ssp <- recovery_for_selection_ssp %>%
-  mutate(abs_rec = abs(median_rec)) %>%
-  group_by(param_label) %>%
-  slice_max(abs_rec, n = 1) %>%
-  select(param_label, indicator_measure, median_rec, validity_strength)
-print(best_indicators_ssp)
 
 # Correlation transfer statistics
 cat("\n\nSSP CORRELATION TRANSFER (N=200, 100 trials/condition):\n")
