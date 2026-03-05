@@ -34,8 +34,9 @@ format:
   apaquarto-docx: default
   apaquarto-pdf:
     keep-tex: true
+floatsintext: true
+output-dir: "."
 bibliography: validity_computational_psychometrics.bib
-csl: apa.csl
 abstract: "Psychometric methods alone cannot determine what cognitive tasks measure. We argue that validity -- whether behavioral indicators actually reflect the cognitive processes they are intended to measure -- is fundamentally a theoretical problem that requires explicit process theory, not better psychometrics. Traditional validation through convergent and discriminant correlations is circular when constructs are defined through the same correlational patterns used to validate them. We propose that computational cognitive models can break this circularity by specifying how cognitive processes generate behavior, allowing validity to be assessed independently for each indicator through simulation. We demonstrate this framework using two architecturally distinct models of conflict processing -- the Diffusion Model for Conflict (DMC) and the Shrinking Spotlight model (SSP) -- applied to tasks commonly used to measure attention control. Simulations reveal four systematic measurement phenomena invisible to correlational validation: (1) process impurity, where most behavioral indicators conflate multiple cognitive processes; (2) differential validity, where RT difference scores selectively reflect attention-control parameters under both models; (3) reliability-validity dissociations, where highly reliable mean scores show weaker validity for attention control than less reliable difference scores; and (4) correlation transfer failure, where strong process-level correlations across tasks transfer only weakly to indicator-level correlations, explaining why cross-task convergent validity is typically low. These phenomena emerge consistently from both models despite fundamentally different processing assumptions. Extension to working memory measurement using a multinomial processing model for complex span tasks confirms that the same structural phenomena generalize beyond conflict tasks and evidence-accumulation models. We conclude that advancing validity requires explicit theories of how cognition generates behavior, not better correlations."
 keywords:
   - validity
@@ -45,7 +46,7 @@ keywords:
   - working memory
   - psychometrics
 execute:
-  echo: true
+  echo: false
   eval: false
   warning: false
   message: false
