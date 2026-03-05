@@ -326,3 +326,130 @@
 #' }
 #' @source Generated via `scripts/SaveData_SSP_Correlation.R` from simulation results
 "ssp_correlation_recCorrs"
+
+# ==============================================================================
+# M3 RECOVERY SIMULATION DATASETS
+# ==============================================================================
+
+#' Behavioral Results from the M3 Recovery Simulation
+#'
+#' Contains response proportion indicators from a parameter recovery simulation
+#' using the M3 model for complex span tasks. Data were generated with known M3
+#' parameters (c, a, f), then behavioral indicators were computed to assess how
+#' well parameters can be recovered from categorical response proportions.
+#'
+#' @format ## `m3_recovery_behavior`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{measure}{Type of measure: "proportion" (raw category proportions) or "composite" (derived indicators)}
+#'   \item{indicator}{Response category or composite: "corr", "other", "distc", "disto", "npl",
+#'         "accuracy", "intrusion_mem", "intrusion_dist", "intrusion_total", "npl_rate"}
+#'   \item{value}{The observed value of the behavioral measure}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 25", "N = 50", or "N = 100"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Recovery.R` from simulation results
+"m3_recovery_behavior"
+
+#' Parameter Recovery Results from the M3 Recovery Simulation
+#'
+#' Contains correlations between generating M3 parameters and recovered parameters
+#' from categorical response indicators. Shows how well each M3 parameter (c, a, f)
+#' can be recovered from different behavioral measures.
+#'
+#' @format ## `m3_recovery_parRecovery`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{genPar}{Generating M3 parameter: "c" (context binding), "a" (item activation), "f" (filtering)}
+#'   \item{measure}{Indicator type: "proportion" or "composite"}
+#'   \item{indicator}{Response category or composite measure}
+#'   \item{rec}{Recovery correlation (correlation between generating and recovered parameter)}
+#'   \item{rec_corrected}{Recovery correlation corrected for indicator reliability}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 25", "N = 50", or "N = 100"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Recovery.R` from simulation results
+"m3_recovery_parRecovery"
+
+#' Reliability Results from the M3 Recovery Simulation
+#'
+#' Contains split-half reliability estimates for M3 behavioral indicators.
+#' Reliability is computed using odd-even trial splits within each replication.
+#'
+#' @format ## `m3_recovery_reliability`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{measure}{Measure type: "proportion" or "composite"}
+#'   \item{indicator}{Response category or composite measure}
+#'   \item{reliability}{Split-half reliability estimate (Spearman-Brown corrected)}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 25", "N = 50", or "N = 100"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Recovery.R` from simulation results
+"m3_recovery_reliability"
+
+# ==============================================================================
+# M3 CORRELATION SIMULATION DATASETS
+# ==============================================================================
+
+#' Behavioral Results from the M3 Correlation Simulation
+#'
+#' Contains behavioral statistics from a cross-task correlation simulation using M3.
+#' Two complex span tasks were generated with correlated M3 parameters to assess whether
+#' parameter-level correlations propagate to behavioral indicators.
+#'
+#' @format ## `m3_correlation_behavior`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{measure}{Type of measure: "proportion" or "composite"}
+#'   \item{indicator}{Response category or composite measure}
+#'   \item{value}{The observed value of the behavioral measure}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 200"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Correlation.R` from simulation results
+"m3_correlation_behavior"
+
+#' Reliability Results from the M3 Correlation Simulation
+#'
+#' Contains split-half reliability estimates for indicators from correlated M3 tasks.
+#'
+#' @format ## `m3_correlation_reliability`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{measure}{Measure type: "proportion" or "composite"}
+#'   \item{indicator}{Response category or composite measure}
+#'   \item{reliability}{Split-half reliability estimate}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 200"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Correlation.R` from simulation results
+"m3_correlation_reliability"
+
+#' Cross-Task Correlations from the M3 Correlation Simulation
+#'
+#' Contains cross-task correlations for M3 behavioral indicators. Key dataset for
+#' assessing whether M3 parameter-level correlations translate to indicator-level
+#' correlations (correlation transfer failure in working memory tasks).
+#'
+#' @format ## `m3_correlation_recCorrs`
+#' A data frame with multiple rows containing:
+#' \describe{
+#'   \item{measure}{Measure type: "proportion" or "composite"}
+#'   \item{indicator}{Response category or composite measure}
+#'   \item{correlation}{Observed cross-task correlation for this indicator}
+#'   \item{correlation_corrected}{Cross-task correlation corrected for reliability}
+#'   \item{true_corr.*}{Target parameter correlations}
+#'   \item{emp_corr.*}{Empirical correlations for M3 parameters (c, a, f)}
+#'   \item{nRep}{Replication number (1-250)}
+#'   \item{SampleSize}{Sample size factor: "N = 200"}
+#'   \item{nTrials}{Number of trials: "50", "100", or "200"}
+#'   \item{correlated_par}{Which parameter(s) were correlated: "c", "a", "f", "c-a", "c-f", "a-f", "c-a-f"}
+#' }
+#' @source Generated via `scripts/SaveData_M3_Correlation.R` from simulation results
+"m3_correlation_recCorrs"

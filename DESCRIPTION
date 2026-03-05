@@ -30,9 +30,10 @@ Suggests:
     ggthemes,
     patchwork,
     remotes
-Imports: 
+Imports:
     magrittr,
     dRiftDM,
+    bmm,
     data.table,
     tidytable,
     stringr,
