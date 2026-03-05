@@ -8,7 +8,7 @@ This package implements simulation-based validity analyses that demonstrate how 
 
 - **DMC** (Diffusion Model for Conflict) — temporal conflict between automatic and controlled evidence accumulation
 - **SSP** (Shrinking Spotlight) — attentional narrowing from broad to focused processing
-- **M3** (Memory Measurement Model) — multinomial processing tree model for complex span tasks
+- **M3** (Memory Measurement Model) — assumes continuous activations underlying multinomial response categories in complex span tasks
 
 The simulations reveal four measurement phenomena: process impurity, selective validity, reliability–validity dissociations, and correlation transfer failure.
 
