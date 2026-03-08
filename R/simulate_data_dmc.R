@@ -21,11 +21,11 @@ simulate_data_dmc <- function(n_sub, n_trials, par_limits = NULL, verbose = 0, s
     # default settings
     lower <- c(
       muc = 1.5, b = 0.4, non_dec = 0.15,
-      tau = 0.02, A = 0.015
+      tau = 0.03, A = 0.05
     )
     upper <- c(
       muc = 5, b = 0.8, non_dec = 0.5,
-      tau = 0.12, A = 0.40
+      tau = 0.10, A = 0.25
     )
   } else {
     # Use custom limits for varying parameters
