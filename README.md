@@ -1,16 +1,17 @@
 # ComputationalValidity
 
-Companion R package for **Frischkorn, Rebmann, & Oberauer (submitted): "Validity is a Theoretical Problem — A Computational Psychometrics Perspective on Cognitive Task Validity."**
+Companion R package for **Frischkorn, Rebmann, & Oberauer (submitted): "Validity is a Theoretical Problem — A Computational Psychometrics Perspective on How to Measure Cognition."**
 
 ## Overview
 
-This package implements simulation-based validity analyses that demonstrate how generative cognitive models can assess the validity of behavioral indicators independently of cross-task correlations. Simulations use three cognitive models:
+This package implements simulation-based validity analyses that demonstrate how generative cognitive models can assess the validity of behavioral indicators independently of cross-task correlations. The manuscript focuses on two models of conflict processing:
 
 - **DMC** (Diffusion Model for Conflict) — temporal conflict between automatic and controlled evidence accumulation
 - **SSP** (Shrinking Spotlight) — attentional narrowing from broad to focused processing
-- **M3** (Memory Measurement Model) — assumes continuous activations underlying multinomial response categories in complex span tasks
 
 The simulations reveal four measurement phenomena: process impurity, selective validity, reliability–validity dissociations, and correlation transfer failure.
+
+The repository also contains simulation code and results for the **M3** (Memory Measurement Model) applied to complex span tasks, which extends the framework to working memory measurement with categorical data. These M3 materials are not included in the current manuscript but are available for reuse.
 
 ## Repository Structure
 

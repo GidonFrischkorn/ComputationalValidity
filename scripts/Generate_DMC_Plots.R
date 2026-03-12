@@ -216,6 +216,7 @@ fig2 <- ggplot(reliability_recovery_data,
              ),
              scales = "free_x") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray30") +
+  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6) +
   geom_point(alpha = 0.3, size = 1.5) +
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2) +
   scale_color_viridis_d(
@@ -267,7 +268,7 @@ correlation_transfer <- df_correlations_all %>%
   filter(
     SampleSize == "N = 200",
     nTrials == "100",
-    indicator == "difference",
+    indicator %in% c("difference", "mean"),
     measure %in% c("RT", "PC"),
     correlated_par %in% c("muc","A","tau","muc-A","muc-tau","A-tau")
   ) %>%
@@ -303,12 +304,19 @@ correlation_transfer <- df_correlations_all %>%
       "Amplitude (A)", "Controlled Drift (μc)", "Temporal Dynamics (τ)",
       "μc + A", "μc + τ", "A + τ"
     )),
-    measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct")
+    measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
+    indicator_label = case_when(
+      indicator == "difference" & measure == "RT" ~ "RT Difference",
+      indicator == "difference" & measure == "PC" ~ "Accuracy Difference",
+      indicator == "mean" & measure == "RT" ~ "RT Mean",
+      indicator == "mean" & measure == "PC" ~ "Accuracy Mean",
+      TRUE ~ paste(measure, indicator)
+    )
   ) %>%
   filter(!is.na(gen_param_cor))
 
 fig3 <- ggplot(correlation_transfer,
-               aes(x = gen_param_cor, y = correlation_corrected, color = measure_label)) +
+               aes(x = gen_param_cor, y = correlation_corrected, color = indicator_label)) +
   facet_wrap(~ param_label, nrow = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
               color = "gray30", linewidth = 0.8) +
@@ -316,7 +324,8 @@ fig3 <- ggplot(correlation_transfer,
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2, alpha = 0.2) +
   scale_color_manual(
     name = "Behavioral Indicator",
-    values = c("Response Time" = "#E69F00", "Proportion Correct" = "#56B4E9")
+    values = c("RT Difference" = "#E69F00", "Accuracy Difference" = "#56B4E9",
+               "RT Mean" = "#D55E00", "Accuracy Mean" = "#0072B2")
   ) +
   labs(
     x = "Generating Parameter Correlation",

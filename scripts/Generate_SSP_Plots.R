@@ -222,6 +222,7 @@ figS2 <- ggplot(reliability_recovery_data_ssp,
              ),
              scales = "free_x") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray30") +
+  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6) +
   geom_point(alpha = 0.3, size = 1.5) +
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2) +
   scale_color_viridis_d(
@@ -258,7 +259,7 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
   filter(
     SampleSize == "N = 200",
     nTrials == "100",
-    indicator == "difference",
+    indicator %in% c("difference", "mean"),
     measure %in% c("RT", "PC"),
     correlated_par %in% c("p", "sd_0", "p-sd_0")
   ) %>%
@@ -275,12 +276,19 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
       correlated_par == "p-sd_0" ~ "Multiple Parameters\n(p, sd_0)",
       TRUE ~ correlated_par
     ),
-    measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct")
+    measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
+    indicator_label = case_when(
+      indicator == "difference" & measure == "RT" ~ "RT Difference",
+      indicator == "difference" & measure == "PC" ~ "Accuracy Difference",
+      indicator == "mean" & measure == "RT" ~ "RT Mean",
+      indicator == "mean" & measure == "PC" ~ "Accuracy Mean",
+      TRUE ~ paste(measure, indicator)
+    )
   ) %>%
   filter(!is.na(gen_param_cor))
 
 figS3 <- ggplot(correlation_transfer_ssp,
-               aes(x = gen_param_cor, y = correlation, color = measure_label)) +
+               aes(x = gen_param_cor, y = correlation, color = indicator_label)) +
   facet_wrap(~ param_label, nrow = 1) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
               color = "gray30", linewidth = 0.8) +
@@ -288,7 +296,8 @@ figS3 <- ggplot(correlation_transfer_ssp,
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2, alpha = 0.2) +
   scale_color_manual(
     name = "Behavioral Indicator",
-    values = c("Response Time" = "#E69F00", "Proportion Correct" = "#56B4E9")
+    values = c("RT Difference" = "#E69F00", "Accuracy Difference" = "#56B4E9",
+               "RT Mean" = "#D55E00", "Accuracy Mean" = "#0072B2")
   ) +
   labs(
     x = "Generating Parameter Correlation",
@@ -321,7 +330,7 @@ recovery_comparison_ssp <- df_recovery_ssp %>%
   filter(
     genPar %in% c("b", "non_dec", "p", "sd_0"),
     measure %in% c("RT", "PC", "drift", "boundary", "non_dec"),
-    indicator == "difference",
+    indicator %in% c("mean", "difference"),
     SampleSize == "N = 100",
     nTrials == "100"
   ) %>%
@@ -339,18 +348,18 @@ recovery_comparison_ssp <- df_recovery_ssp %>%
       TRUE ~ "Other"
     ),
     measure_label = case_when(
-      measure == "RT" ~ "RT Difference",
-      measure == "PC" ~ "PC Difference",
-      measure == "drift" ~ "ezDM Drift",
-      measure == "boundary" ~ "ezDM Boundary",
-      measure == "non_dec" ~ "ezDM Non-Decision",
+      measure == "RT" ~ "RT",
+      measure == "PC" ~ "PC",
+      measure == "drift" ~ "Drift",
+      measure == "boundary" ~ "Boundary",
+      measure == "non_dec" ~ "Non-Decision",
       TRUE ~ measure
     )
   ) %>%
   filter(measure_type %in% c("Behavioral", "ezDM"))
 
 recovery_summary_comp_ssp <- recovery_comparison_ssp %>%
-  group_by(param_label, measure_label, measure_type) %>%
+  group_by(param_label, measure_label, measure_type, indicator) %>%
   summarize(
     median_rec = median(rec, na.rm = TRUE),
     mean_rec = mean(rec, na.rm = TRUE),
@@ -361,7 +370,7 @@ recovery_summary_comp_ssp <- recovery_comparison_ssp %>%
 
 figS4 <- ggplot(recovery_summary_comp_ssp,
                aes(x = measure_label, y = median_rec, fill = measure_type)) +
-  facet_wrap(~ param_label, nrow = 1, scales = "free_x") +
+  facet_grid(indicator ~ param_label, scales = "free_x") +
   geom_hline(yintercept = 0, linetype = "solid", color = "gray60", linewidth = 0.8) +
   geom_hline(yintercept = c(-0.7, -0.5, -0.3, 0.3, 0.5, 0.7), linetype = "dashed",
              color = "gray40", alpha = 0.4) +
