@@ -270,41 +270,28 @@ correlation_transfer <- df_correlations_all %>%
     nTrials == "100",
     indicator %in% c("difference", "mean"),
     measure %in% c("RT", "PC"),
-    correlated_par %in% c("muc","A","tau","muc-A","muc-tau","A-tau")
+    correlated_par %in% c("muc", "A", "tau")
   ) %>%
   mutate(
-    # Get the relevant conflict parameter correlation
-    # For single parameters: use that parameter's correlation
-    # For pairs: use average of the two conflict parameters' correlations
     gen_param_cor = case_when(
       correlated_par == "muc" ~ emp_corr.muc,
       correlated_par == "A" ~ emp_corr.A,
       correlated_par == "tau" ~ emp_corr.tau,
-      correlated_par == "muc-A" ~ emp_corr.A,
-      correlated_par == "muc-tau" ~ emp_corr.tau,
-      correlated_par == "A-tau" ~ (emp_corr.A + emp_corr.tau) / 2,
       TRUE ~ NA_real_
     ),
-    param_label = case_when(
+    param_label = factor(case_when(
       correlated_par == "muc" ~ "Controlled Drift (μc)",
       correlated_par == "A" ~ "Amplitude (A)",
       correlated_par == "tau" ~ "Temporal Dynamics (τ)",
-      correlated_par == "muc-A" ~ "μc + A",
-      correlated_par == "muc-tau" ~ "μc + τ",
-      correlated_par == "A-tau" ~ "A + τ",
       TRUE ~ correlated_par
-    ),
-    # Create row grouping for faceting
-    param_type = case_when(
-      correlated_par %in% c("A", "muc", "tau") ~ "Single Parameter",
-      TRUE ~ "Parameter Pairs"
-    ),
-    # Order for display
-    param_label = factor(param_label, levels = c(
-      "Amplitude (A)", "Controlled Drift (μc)", "Temporal Dynamics (τ)",
-      "μc + A", "μc + τ", "A + τ"
+    ), levels = c(
+      "Amplitude (A)", "Controlled Drift (μc)", "Temporal Dynamics (τ)"
     )),
     measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
+    score_type = factor(
+      ifelse(indicator == "difference", "Difference Scores", "Mean Scores"),
+      levels = c("Difference Scores", "Mean Scores")
+    ),
     indicator_label = case_when(
       indicator == "difference" & measure == "RT" ~ "RT Difference",
       indicator == "difference" & measure == "PC" ~ "Accuracy Difference",
@@ -316,16 +303,15 @@ correlation_transfer <- df_correlations_all %>%
   filter(!is.na(gen_param_cor))
 
 fig3 <- ggplot(correlation_transfer,
-               aes(x = gen_param_cor, y = correlation_corrected, color = indicator_label)) +
-  facet_wrap(~ param_label, nrow = 2) +
+               aes(x = gen_param_cor, y = correlation_corrected, color = measure_label)) +
+  facet_grid(score_type ~ param_label) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
               color = "gray30", linewidth = 0.8) +
-  geom_point(alpha = 0.4, size = 2) +
+  geom_point(alpha = 0.1, size = 2) +
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2, alpha = 0.2) +
   scale_color_manual(
     name = "Behavioral Indicator",
-    values = c("RT Difference" = "#E69F00", "Accuracy Difference" = "#56B4E9",
-               "RT Mean" = "#D55E00", "Accuracy Mean" = "#0072B2")
+    values = c("Response Time" = "#D55E00", "Proportion Correct" = "#0072B2")
   ) +
   labs(
     x = "Generating Parameter Correlation",
@@ -339,11 +325,11 @@ fig3 <- ggplot(correlation_transfer,
   )
 
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.png"),
-       fig3, width = 13, height = 5, dpi = 600)
+       fig3, width = 10, height = 6, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.pdf"),
-       fig3, width = 13, height = 5)
+       fig3, width = 10, height = 6)
 ggsave(here("figures", "manuscript", "DMC_Correlation_Transfer.tiff"),
-       fig3, width = 13, height = 5, dpi = 600, compression = "lzw")
+       fig3, width = 10, height = 6, dpi = 600, compression = "lzw")
 
 cat("  Figure 3 saved successfully!\n")
 

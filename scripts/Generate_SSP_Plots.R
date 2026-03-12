@@ -261,22 +261,24 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
     nTrials == "100",
     indicator %in% c("difference", "mean"),
     measure %in% c("RT", "PC"),
-    correlated_par %in% c("p", "sd_0", "p-sd_0")
+    correlated_par %in% c("p", "sd_0")
   ) %>%
   mutate(
     gen_param_cor = case_when(
       correlated_par == "p" ~ emp_corr.p,
       correlated_par == "sd_0" ~ emp_corr.sd_0,
-      correlated_par == "p-sd_0" ~ (emp_corr.p + emp_corr.sd_0) / 2,
       TRUE ~ NA_real_
     ),
     param_label = case_when(
       correlated_par == "p" ~ "Perceptual Input (p)",
       correlated_par == "sd_0" ~ "Initial Noise (sd_0)",
-      correlated_par == "p-sd_0" ~ "Multiple Parameters\n(p, sd_0)",
       TRUE ~ correlated_par
     ),
     measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
+    score_type = factor(
+      ifelse(indicator == "difference", "Difference Scores", "Mean Scores"),
+      levels = c("Difference Scores", "Mean Scores")
+    ),
     indicator_label = case_when(
       indicator == "difference" & measure == "RT" ~ "RT Difference",
       indicator == "difference" & measure == "PC" ~ "Accuracy Difference",
@@ -288,16 +290,15 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
   filter(!is.na(gen_param_cor))
 
 figS3 <- ggplot(correlation_transfer_ssp,
-               aes(x = gen_param_cor, y = correlation, color = indicator_label)) +
-  facet_wrap(~ param_label, nrow = 1) +
+               aes(x = gen_param_cor, y = correlation, color = measure_label)) +
+  facet_grid(score_type ~ param_label) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
               color = "gray30", linewidth = 0.8) +
-  geom_point(alpha = 0.4, size = 2) +
+  geom_point(alpha = 0.1, size = 2) +
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2, alpha = 0.2) +
   scale_color_manual(
     name = "Behavioral Indicator",
-    values = c("RT Difference" = "#E69F00", "Accuracy Difference" = "#56B4E9",
-               "RT Mean" = "#D55E00", "Accuracy Mean" = "#0072B2")
+    values = c("Response Time" = "#D55E00", "Proportion Correct" = "#0072B2")
   ) +
   labs(
     x = "Generating Parameter Correlation",
@@ -311,11 +312,11 @@ figS3 <- ggplot(correlation_transfer_ssp,
   )
 
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.png"),
-       figS3, width = 13, height = 5, dpi = 600)
+       figS3, width = 8, height = 6, dpi = 600)
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.pdf"),
-       figS3, width = 13, height = 5)
+       figS3, width = 8, height = 6)
 ggsave(here("figures", "manuscript", "SSP_Correlation_Transfer.tiff"),
-       figS3, width = 13, height = 5, dpi = 600, compression = "lzw")
+       figS3, width = 8, height = 6, dpi = 600, compression = "lzw")
 
 cat("  Figure S3 saved successfully!\n")
 

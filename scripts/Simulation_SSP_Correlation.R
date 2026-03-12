@@ -8,7 +8,7 @@ Design <- createDesign(
   sample_size = c(200),
   nTrials = c(50,100,200),
   correlation = "random",
-  correlated_par = c("p","sd_0","p-sd_0")
+  correlated_par = c("p", "sd_0", "p-sd_0")
 )
 
 # Model to simulate - use simplified model (no r parameter)
