@@ -22,7 +22,7 @@ author:
 author-note:
   disclosures:
     study-registration: "This study was not preregistered."
-    data-sharing: "Data, analysis code, and simulation scripts are available at https://github.com/GidonFrischkorn/ComputationalValidity."
+    data-sharing: "Analysis code and simulation scripts are available at https://github.com/GidonFrischkorn/ComputationalValidity. Simulation data and results are archived on the Open Science Framework at https://doi.org/10.17605/OSF.IO/6QNRV."
     conflict-of-interest: "The authors declare no conflicts of interest."
     financial-support: "This research was supported by a grant from the Swiss National Science Foundation (SNSF) awarded to Gidon T. Frischkorn (Grant No. 208828)."
     authorship-agreements: |
@@ -168,7 +168,7 @@ We focus on two generative models formalizing different perspectives on conflict
 
 We conducted separate simulations of behavior in a conflict task using DMC and SSP, following identical design principles. The task was to make binary decisions on a relevant stimulus dimension (e.g., the feature of the target of a flanker task) in the context of an irrelevant stimulus dimension (e.g., the feature of the flankers). Half of the trials were congruent (i.e., the flanker feature matching the target feature) and the other half were incongruent. We systematically varied sample size (*N* = 25, 50, 100, 200) and trials per condition (50, 100, 200), with each design cell replicated 250 times. For each simulated participant, we drew parameter values from distributions producing realistic behavioral patterns (see Appendix), and generated trial-level RT and accuracy data. From these data we computed standard behavioral indicators: mean scores (average RT and accuracy) and difference scores (RT or error rate in incongruent minus congruent trials). Because researchers have argued that applying computational measurement models to estimate parameters improves measurement [@Yanguez2024], we also calculated EZ-Diffusion Model parameters [@WagenmakersEtAl2007] - a simplified cognitive model that estimates basic diffusion parameters from aggregate behavioral statistics without assuming the DMC's or SSP's specific architecture. With the EZ-diffusion model we test whether measurement models improve validity over raw behavioral indicators. Correlations between indicators and generating parameters serve as quantitative validity estimates; split-half reliability provides an independent assessment of indicator consistency.
 
-For cross-task analyses, we generated data from two independent "tasks" such that one parameter was correlated between tasks (e.g., controlled drift rate in Task 1 correlated with Task 2), testing whether parameter-level correlations transfer to indicator-level correlations. All simulations were conducted in R; code, datasets, and analysis scripts are available in the ComputationalValidity R package (https://github.com/GidonFrischkorn/ComputationalValidity).
+For cross-task analyses, we generated data from two independent "tasks" such that one parameter was correlated between tasks (e.g., controlled drift rate in Task 1 correlated with Task 2), testing whether parameter-level correlations transfer to indicator-level correlations. All simulations were conducted in R; code and analysis scripts are available in the ComputationalValidity R package (https://github.com/GidonFrischkorn/ComputationalValidity), and simulation data and results are archived at https://doi.org/10.17605/OSF.IO/6QNRV.
 
 ## Model-Based Validity Analysis
 
