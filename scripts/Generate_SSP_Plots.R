@@ -105,11 +105,11 @@ recovery_comprehensive_ssp <- df_recovery_ssp %>%
     param_label = factor(
       case_when(
         genPar == "p" ~ "Perceptual Input (p)",
-        genPar == "sd_0" ~ "Initial Noise (σ₀)",
+        genPar == "sd_0" ~ "Initial Attentional Width (σ₀)",
         genPar == "b" ~ "Boundary (b)",
         genPar == "non_dec" ~ "Non-Decision Time (Ter)"
       ),
-      levels = c("Perceptual Input (p)", "Initial Noise (σ₀)", 
+      levels = c("Perceptual Input (p)", "Initial Attentional Width (σ₀)",
                  "Boundary (b)", "Non-Decision Time (Ter)")
     ),
     indicator_measure = case_when(
@@ -210,36 +210,50 @@ reliability_recovery_data_ssp <- df_recovery_ssp %>%
     )
   )
 
-figS2 <- ggplot(reliability_recovery_data_ssp,
-               aes(x = reliability, y = rec, color = as.factor(nTrials))) +
-  facet_grid(genPar ~ indicator_label,
-             labeller = labeller(
-               genPar = c(
-                 "b" ~ "Boundary (b)",
-                 "p" ~ "Perceptual Input (p)",
-                 "sd_0" ~ "Initial Noise (sd_0)"
-               )
-             ),
-             scales = "free_x") +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray30") +
-  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6) +
-  geom_point(alpha = 0.3, size = 1.5) +
-  geom_smooth(method = "lm", se = TRUE, linewidth = 1.2) +
-  scale_color_viridis_d(
-    name = "Trials per Condition",
-    option = "D",
-    end = 0.8
-  ) +
-  labs(
-    x = "Indicator Reliability",
-    y = "Parameter Recovery (Correlation)"
-  ) +
-  coord_cartesian(ylim = c(-1, 1)) +
-  theme_manuscript +
+# Shared plot elements
+reliability_base_ssp <- list(
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray30"),
+  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6),
+  geom_point(alpha = 0.3, size = 1.5),
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1.2),
+  scale_color_viridis_d(name = "Trials per Condition", option = "D", end = 0.8),
+  coord_cartesian(ylim = c(-1, 1)),
+  theme_manuscript,
   theme(
     strip.text = element_text(size = 10, face = "bold"),
     strip.background = element_rect(fill = "gray90", color = "black")
   )
+)
+
+genPar_labeller_ssp <- labeller(
+  genPar = c(
+    "b" = "Boundary (b)",
+    "p" = "Perceptual Input (p)",
+    "sd_0" = "Initial Attentional Width (sd_0)"
+  )
+)
+
+# Panel (a): Difference scores
+figS2a <- ggplot(reliability_recovery_data_ssp %>% filter(indicator == "difference"),
+                 aes(x = reliability, y = rec, color = as.factor(nTrials))) +
+  facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller_ssp) +
+  reliability_base_ssp +
+  labs(x = "Reliability of Difference Scores",
+       y = "Parameter Recovery (Correlation)")
+
+# Panel (b): Mean scores
+figS2b <- ggplot(reliability_recovery_data_ssp %>% filter(indicator == "mean"),
+                 aes(x = reliability, y = rec, color = as.factor(nTrials))) +
+  facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller_ssp) +
+  reliability_base_ssp +
+  labs(x = "Reliability of Mean Scores",
+       y = "Parameter Recovery (Correlation)")
+
+# Combine panels
+figS2 <- figS2a / figS2b +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
 
 ggsave(here("figures", "manuscript", "SSP_Reliability_Paradox.png"),
        figS2, width = 12, height = 8, dpi = 600)
@@ -271,7 +285,7 @@ correlation_transfer_ssp <- df_correlations_ssp %>%
     ),
     param_label = case_when(
       correlated_par == "p" ~ "Perceptual Input (p)",
-      correlated_par == "sd_0" ~ "Initial Noise (sd_0)",
+      correlated_par == "sd_0" ~ "Initial Attentional Width (sd_0)",
       TRUE ~ correlated_par
     ),
     measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
@@ -340,7 +354,7 @@ recovery_comparison_ssp <- df_recovery_ssp %>%
       genPar == "b" ~ "Boundary (b)",
       genPar == "non_dec" ~ "Non-Decision Time (t0)",
       genPar == "p" ~ "Perceptual Input (p)",
-      genPar == "sd_0" ~ "Initial Noise (sd_0)",
+      genPar == "sd_0" ~ "Initial Attentional Width (sd_0)",
       TRUE ~ genPar
     ),
     measure_type = case_when(

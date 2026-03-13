@@ -74,13 +74,6 @@ df_recovery_all <- df_recovery_all %>%
 # =============================================================================
 # FIGURE 1: Equifinality & Model-Guided Indicator Selection
 # =============================================================================
-cat("Generating Figure 1: Equifinality & Model-Guided Indicator Selection...\n")
-
-# PRIMARY FINDING: Demonstrates equifinality through selective recovery patterns
-# Shows ALL 5 parameters × 4 indicators to reveal:
-# 1. Each indicator only recovers SOME parameters (incomplete coverage)
-# 2. Different indicators needed for different constructs (selective sensitivity)
-# 3. Practical guidance: which indicators to use for which parameters
 
 # Calculate recovery quality for ALL parameters and ALL indicators
 # Include 95% confidence intervals using bootstrap percentile method
@@ -177,10 +170,6 @@ cat("  Figure 1 saved successfully!\n")
 # =============================================================================
 # FIGURE 2: The Reliability Paradox
 # =============================================================================
-cat("Generating Figure 2: The Reliability Paradox...\n")
-
-# THIRD FINDING: High INDICATOR reliability doesn't guarantee parameter recovery
-# Shows that the reliability-validity link is not necessary
 
 # Get reliability of RT indicators (both difference and mean scores)
 reliability_recovery_data <- df_recovery_all %>%
@@ -204,43 +193,57 @@ reliability_recovery_data <- df_recovery_all %>%
     )
   )
 
-fig2 <- ggplot(reliability_recovery_data,
-               aes(x = reliability, y = rec, color = as.factor(nTrials))) +
-  facet_grid(genPar ~ indicator_label,
-             labeller = labeller(
-               genPar = c(
-                 "A" = "Amplitude (A)",
-                 "tau" = "Temporal Dynamics (τ)",
-                 "muc" = "Controlled drift (μc)"
-               )
-             ),
-             scales = "free_x") +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray30") +
-  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6) +
-  geom_point(alpha = 0.3, size = 1.5) +
-  geom_smooth(method = "lm", se = TRUE, linewidth = 1.2) +
-  scale_color_viridis_d(
-    name = "Trials per Condition",
-    option = "D",
-    end = 0.8
-  ) +
-  labs(
-    x = "Indicator Reliability",
-    y = "Parameter Recovery (Correlation)"
-  ) +
-  coord_cartesian(ylim = c(-1, 1)) +
-  theme_manuscript +
+# Shared plot elements
+reliability_base <- list(
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray30"),
+  stat_function(fun = sqrt, linetype = "dashed", color = "gray50", linewidth = 0.6),
+  geom_point(alpha = 0.3, size = 1.5),
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1.2),
+  scale_color_viridis_d(name = "Trials per Condition", option = "D", end = 0.8),
+  coord_cartesian(ylim = c(-1, 1)),
+  theme_manuscript,
   theme(
     strip.text = element_text(size = 10, face = "bold"),
     strip.background = element_rect(fill = "gray90", color = "black")
   )
+)
+
+genPar_labeller <- labeller(
+  genPar = c(
+    "A" = "Amplitude (A)",
+    "tau" = "Temporal Dynamics (τ)",
+    "muc" = "Controlled drift (μc)"
+  )
+)
+
+# Panel (a): Difference scores
+fig2a <- ggplot(reliability_recovery_data %>% filter(indicator == "difference"),
+                aes(x = reliability, y = rec, color = as.factor(nTrials))) +
+  facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller) +
+  reliability_base +
+  labs(x = "Reliability of Difference Scores",
+       y = "Parameter Recovery (Correlation)")
+
+# Panel (b): Mean scores
+fig2b <- ggplot(reliability_recovery_data %>% filter(indicator == "mean"),
+                aes(x = reliability, y = rec, color = as.factor(nTrials))) +
+  facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller) +
+  reliability_base +
+  labs(x = "Reliability of Mean Scores",
+       y = "Parameter Recovery (Correlation)")
+
+# Combine panels
+fig2 <- fig2a / fig2b +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
 
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.png"),
-       fig2, width = 8, height = 12, dpi = 600)
+       fig2, width = 12, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.pdf"),
-       fig2, width = 8, height = 12)
+       fig2, width = 12, height = 8)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.tiff"),
-       fig2, width = 8, height = 12, dpi = 600, compression = "lzw")
+       fig2, width = 12, height = 8, dpi = 600, compression = "lzw")
 
 cat("  Figure 2 saved successfully!\n")
 
@@ -248,8 +251,6 @@ cat("  Figure 2 saved successfully!\n")
 # PART 2: CORRELATION SIMULATION - Nuanced Perspective
 # =============================================================================
 
-# Load package datasets
-cat("Loading DMC correlation data from package...\n")
 data(dmc_correlation_recCorrs, package = "ComputationalValidity")
 
 # Rename for consistency
@@ -258,10 +259,6 @@ df_correlations_all <- data.table(dmc_correlation_recCorrs)
 # =============================================================================
 # FIGURE 3: Correlation Transfer - The Limits of Validity
 # =============================================================================
-cat("Generating Figure 3: Correlation Transfer...\n")
-
-# This figure provides nuance: valid indicators don't always track parameter correlations
-# This is important for understanding the LIMITS of indicator validity
 
 # Prepare correlation transfer data
 correlation_transfer <- df_correlations_all %>%
@@ -336,10 +333,6 @@ cat("  Figure 3 saved successfully!\n")
 # =============================================================================
 # FIGURE 4: Intermediate Modeling - ezDM vs Behavioral Indicators
 # =============================================================================
-cat("Generating Figure 4: Intermediate Modeling...\n")
-
-# This figure shows that intermediate models (ezDM) don't always outperform
-# behavioral indicators. ezDM is better for some parameters but not all.
 
 # Prepare data comparing behavioral (RT/PC difference) vs ezDM parameters
 recovery_comparison <- df_recovery_all %>%
@@ -430,12 +423,7 @@ cat("  Figure 4 saved successfully!\n")
 # =============================================================================
 # Summary Statistics for Text
 # =============================================================================
-cat("\n=============================================================================\n")
-cat("SUMMARY STATISTICS FOR MANUSCRIPT TEXT\n")
-cat("=============================================================================\n\n")
 
-# Differential validity statistics
-cat("DIFFERENTIAL INDICATOR VALIDITY (N=100, 100 trials/condition):\n")
 differential_stats <- df_recovery_all %>%
   filter(
     genPar %in% c("A", "tau", "muc"),
@@ -465,7 +453,6 @@ differential_stats <- df_recovery_all %>%
 print(differential_stats)
 
 # Correlation transfer statistics
-cat("\n\nCORRELATION TRANSFER (N=200, 100 trials/condition):\n")
 if (exists("correlation_transfer")) {
   transfer_stats <- correlation_transfer %>%
     group_by(param_label, measure_label) %>%
@@ -479,7 +466,6 @@ if (exists("correlation_transfer")) {
 }
 
 # Reliability-recovery relationship
-cat("\n\nRELIABILITY-RECOVERY RELATIONSHIP:\n")
 if (exists("reliability_recovery_data")) {
   rel_rec_stats <- reliability_recovery_data %>%
     filter(nTrials == "100") %>%
@@ -499,13 +485,3 @@ if (exists("reliability_recovery_data")) {
     )
   print(rel_rec_stats)
 }
-
-cat("\n=============================================================================\n")
-cat("All manuscript figures saved to: figures/manuscript/\n")
-cat("Figure Summary:\n")
-cat("  Fig1: Parameter Confounding (equifinality problem)\n")
-cat("  Fig2: Reliability Paradox (high reliability ≠ validity)\n")
-cat("  Fig3: Differential Indicator Validity (RT vs PC recover different parameters)\n")
-cat("  Fig4: Correlation Transfer (limits of indicator validity)\n")
-cat("  Fig5: Model-Guided Selection (decision matrix for indicator choice)\n")
-cat("=============================================================================\n")
