@@ -239,11 +239,11 @@ fig2 <- fig2a / fig2b +
   theme(legend.position = "bottom")
 
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.png"),
-       fig2, width = 12, height = 8, dpi = 600)
+       fig2, width = 10, height = 8, dpi = 600)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.pdf"),
-       fig2, width = 12, height = 8)
+       fig2, width = 10, height = 8)
 ggsave(here("figures", "manuscript", "DMC_Reliability_Paradox.tiff"),
-       fig2, width = 12, height = 8, dpi = 600, compression = "lzw")
+       fig2, width = 10, height = 8, dpi = 600, compression = "lzw")
 
 cat("  Figure 2 saved successfully!\n")
 
