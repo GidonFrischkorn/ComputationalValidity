@@ -272,6 +272,46 @@ p_ssp_spot <- ggplot(df_ssp_seq, aes(x = x, y = weight)) +
     parse = TRUE, size = 4.0, color = "#1565C0", hjust = 0.5,
     inherit.aes = FALSE
   ) +
+  # sd bracket — second facet to show narrowing
+  geom_segment(
+    data = data.frame(
+      snap = factor(snap_labels[2], levels = snap_labels),
+      x = -sd_snaps[2], xend = sd_snaps[2],
+      y    = 0,
+      yend = 0),
+    aes(x = x, xend = xend, y = y, yend = yend),
+    color = "#1565C0", linewidth = 0.8, inherit.aes = FALSE,
+    arrow = arrow(ends = "both", type = "closed", length = unit(0.06, "in"))
+  ) +
+  # r_d annotation — arrow from sd_0 to sd(t_2) showing shrinkage rate
+  geom_segment(
+    data = data.frame(
+      snap = factor(snap_labels[2], levels = snap_labels),
+      x = sd_snaps[1], xend = sd_snaps[2],
+      y    = -0.15,
+      yend = -0.15),
+    aes(x = x, xend = xend, y = y, yend = yend),
+    color = "#C62828", linewidth = 0.8, inherit.aes = FALSE,
+    arrow = arrow(ends = "last", type = "closed", length = unit(0.07, "in"))
+  ) +
+  # faint reference line at sd_0 in second facet
+  geom_segment(
+    data = data.frame(
+      snap = factor(snap_labels[2], levels = snap_labels),
+      x = sd_snaps[1], xend = sd_snaps[1],
+      y    = -0.20,
+      yend = 0),
+    aes(x = x, xend = xend, y = y, yend = yend),
+    color = "gray55", linewidth = 0.4, linetype = "dotted", inherit.aes = FALSE
+  ) +
+  geom_text(
+    data = data.frame(
+      snap = factor(snap_labels[2], levels = snap_labels),
+      x = mean(c(sd_snaps[1], sd_snaps[2])) + 0.15, y = -0.42),
+    aes(x = x, y = y, label = "r[d]"),
+    parse = TRUE, size = 5.0, color = "#C62828", hjust = 0.5,
+    inherit.aes = FALSE
+  ) +
   coord_cartesian(ylim = c(-0.52, gauss_peak * 1.06)) +
   labs(x = "Spatial Position", y = "Attentional Weight") +
   theme_gf() +
