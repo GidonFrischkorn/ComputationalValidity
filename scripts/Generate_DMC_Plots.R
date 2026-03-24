@@ -140,7 +140,7 @@ fig1 <- ggplot(recovery_comprehensive,
     colors = c("#D73027", "#FEE08B", "#1A9850"),
     values = scales::rescale(c(0, 0.3, 1)),
     limits = c(0, 1),
-    name = "Recovery\nStrength\n(|r|)",
+    name = "Validity\nStrength\n(|r|)",
     breaks = c(0, 0.3, 0.5, 0.7, 1),
     labels = c("0", "0.3", "0.5", "0.7", "1.0")
   ) +
@@ -222,7 +222,7 @@ fig2a <- ggplot(reliability_recovery_data %>% filter(indicator == "difference"),
   facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller) +
   reliability_base +
   labs(x = "Reliability of Difference Scores",
-       y = "Parameter Recovery (Correlation)")
+       y = "Parameter Validity (Correlation)")
 
 # Panel (b): Mean scores
 fig2b <- ggplot(reliability_recovery_data %>% filter(indicator == "mean"),
@@ -230,7 +230,7 @@ fig2b <- ggplot(reliability_recovery_data %>% filter(indicator == "mean"),
   facet_wrap(~ genPar, nrow = 1, labeller = genPar_labeller) +
   reliability_base +
   labs(x = "Reliability of Mean Scores",
-       y = "Parameter Recovery (Correlation)")
+       y = "Parameter Validity (Correlation)")
 
 # Combine panels
 fig2 <- fig2a / fig2b +
@@ -400,7 +400,7 @@ fig4 <- ggplot(recovery_summary_comp,
   ) +
   labs(
     x = "",
-    y = "Parameter Recovery (Correlation)"
+    y = "Parameter Validity (Correlation)"
   ) +
   coord_cartesian(ylim = c(-1, 1)) +
   theme_manuscript +
