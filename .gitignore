@@ -3,11 +3,20 @@
 .RData
 .Ruserdata
 .DS_Store
+Rplots.pdf
 
 /local
 /output
 /data
 /docs
 
-agents.MD
-.positai
+# Rendered manuscript outputs (regenerate from .qmd)
+reports/*.html
+reports/*.tex
+reports/*.fff
+reports/*.pdf
+reports/*.docx
+reports/*_files/
+
+# High-resolution figure exports (regenerate from scripts)
+figures/manuscript/*.tiff
