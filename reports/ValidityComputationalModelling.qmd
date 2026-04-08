@@ -14,6 +14,7 @@ author:
     affiliations:
       - name: University of Zurich
         department: Department of Psychology
+      - name: Singular IT GmbH
   - name: Klaus Oberauer
     orcid: 0000-0001-8815-6189
     affiliations:
@@ -23,8 +24,8 @@ author-note:
   disclosures:
     study-registration: "This study was not preregistered."
     data-sharing: "Analysis code and simulation scripts are available at https://github.com/GidonFrischkorn/ComputationalValidity. Simulation data and results are archived on the Open Science Framework at https://doi.org/10.17605/OSF.IO/6QNRV."
-    conflict-of-interest: "The authors declare no conflicts of interest."
-    financial-support: "This research was supported by a grant from the Swiss National Science Foundation (SNSF) awarded to Gidon T. Frischkorn (Grant No. 208828)."
+    conflict-of-interest: "Ricardo Rebmann is employed by Singular IT GmbH. The employer had no role in the conceptualization, design, analysis, or interpretation of the research, nor in the writing of the manuscript. The remaining authors declare no conflicts of interest."
+    financial-support: "This research was supported by a grant from the Swiss National Science Foundation (SNSF) awarded to Gidon T. Frischkorn (Grant No. 208828). Ricardo Rebmann's contribution was partly supported by Singular IT GmbH through allocated work time."
     authorship-agreements:
       "Gidon T. Frischkorn: Conceptualization, Methodology, Software, Formal Analysis, Visualization, Writing -- Original Draft.
       Ricardo Rebmann: Methodology, Software, Formal Analysis, Writing -- Review & Editing.
