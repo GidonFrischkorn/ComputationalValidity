@@ -109,13 +109,13 @@ recovery_comprehensive <- df_recovery_all %>%
     ),
     indicator_measure = case_when(
       indicator == "difference" & measure == "RT" ~ "RT Difference",
-      indicator == "difference" & measure == "PC" ~ "PC Difference",
+      indicator == "difference" & measure == "PC" ~ "Accuracy Difference",
       indicator == "mean" & measure == "RT" ~ "RT Mean",
-      indicator == "mean" & measure == "PC" ~ "PC Mean"
+      indicator == "mean" & measure == "PC" ~ "Accuracy Mean"
     ),
     indicator_measure = factor(indicator_measure,
-                               levels = c("RT Difference", "PC Difference",
-                                         "RT Mean", "PC Mean")),
+                               levels = c("RT Difference", "Accuracy Difference",
+                                         "RT Mean", "Accuracy Mean")),
     validity_strength = case_when(
       abs(median_rec) > 0.5 ~ "Strong",
       abs(median_rec) > 0.3 ~ "Moderate",
@@ -284,7 +284,7 @@ correlation_transfer <- df_correlations_all %>%
     ), levels = c(
       "Amplitude (A)", "Controlled Drift (μc)", "Temporal Dynamics (τ)"
     )),
-    measure_label = ifelse(measure == "RT", "Response Time", "Proportion Correct"),
+    measure_label = ifelse(measure == "RT", "Response Time", "Accuracy"),
     score_type = factor(
       ifelse(indicator == "difference", "Difference Scores", "Mean Scores"),
       levels = c("Difference Scores", "Mean Scores")
@@ -308,7 +308,7 @@ fig3 <- ggplot(correlation_transfer,
   geom_smooth(method = "lm", se = TRUE, linewidth = 1.2, alpha = 0.2) +
   scale_color_manual(
     name = "Behavioral Indicator",
-    values = c("Response Time" = "#D55E00", "Proportion Correct" = "#0072B2")
+    values = c("Response Time" = "#D55E00", "Accuracy" = "#0072B2")
   ) +
   labs(
     x = "Generating Parameter Correlation",
@@ -359,12 +359,14 @@ recovery_comparison <- df_recovery_all %>%
     ),
     measure_label = case_when(
       measure == "RT" ~ "RT",
-      measure == "PC" ~ "PC ",
+      measure == "PC" ~ "Accuracy",
       measure == "drift" ~ "Drift",
       measure == "boundary" ~ "Boundary",
       measure == "non_dec" ~ "Non-Decision",
       TRUE ~ measure
-    )
+    ),
+    indicator = factor(indicator,
+                       levels = c("difference", "mean"))
   ) %>%
   filter(measure_type %in% c("Behavioral", "ezDM"))
 
