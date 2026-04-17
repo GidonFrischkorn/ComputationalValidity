@@ -10,13 +10,13 @@ author:
       - name: University of Zurich
         department: Department of Psychology
   - name: Ricardo Rebmann
-    orcid: 0009-0000-8493-2240
+    orcid: 0009-0005-5164-3211
     affiliations:
       - name: University of Zurich
         department: Department of Psychology
       - name: Singular IT GmbH
   - name: Klaus Oberauer
-    orcid: 0000-0001-8815-6189
+    orcid: 0000-0003-3902-7318
     affiliations:
       - name: University of Zurich
         department: Department of Psychology
