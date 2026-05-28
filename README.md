@@ -15,28 +15,43 @@ The repository also contains simulation code and results for the **M3** (Memory 
 
 ## Repository Structure
 
-```
+```text
 R/                 Package functions (simulation, analysis, plotting)
 scripts/           Standalone scripts to run simulations and generate figures
 reports/           Quarto manuscript (apaquarto format, renders to .docx and .pdf)
 figures/           Generated manuscript figures
-data/              Simulation input data
-output/            Saved simulation results
+data/              Simulation input data (not tracked in git — see Data Availability below)
+output/            Saved simulation results (not tracked in git)
 ```
 
-## Installation
+## Using the Package
+
+Install the package to access the simulation and analysis functions in `R/`:
 
 ```r
 # install.packages("remotes")
 remotes::install_github("gidonfrischkorn/ComputationalValidity")
 ```
 
+The installed package includes all exported functions but not the simulation scripts, reports, figures, or data. The package alone is sufficient if you want to use the functions in your own analyses.
+
 ## Reproducing the Analyses
 
-1. Install the package and its dependencies.
+To reproduce the full analyses and manuscript, clone the repository and follow these steps:
+
+```r
+# install.packages("remotes")
+remotes::install_github("gidonfrischkorn/ComputationalValidity")
+```
+
+1. **Download the simulation data** from the [OSF repository](https://osf.io/6qnrv/) by running `scripts/download_data.R`.
 2. Run the simulation scripts in `scripts/` (e.g., `Simulation_DMC_Recovery.R`).
 3. Run the analysis and plotting scripts (e.g., `Analyze_DMC_Recovery.R`, `Generate_DMC_Plots.R`).
 4. Render the manuscript: `quarto render reports/ValidityComputaionalModelling.qmd`
+
+## Data Availability
+
+Simulation datasets (~318 MB total) are hosted on [OSF](https://osf.io/6qnrv/) because the largest file exceeds GitHub's per-file size limit. Run `scripts/download_data.R` to download all `.rda` files into `data/` using the `osfr` package.
 
 ## License
 

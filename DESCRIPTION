@@ -27,7 +27,8 @@ Suggests:
     rmarkdown,
     bookdown,
     ggthemes,
-    remotes
+    remotes,
+    osfr
 Imports:
     magrittr,
     dRiftDM,

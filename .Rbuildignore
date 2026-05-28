@@ -4,3 +4,10 @@
 ^\.Rproj\.user$
 ^\.positai$
 ^\.claude$
+^scripts$
+^reports$
+^figures$
+^output$
+^local$
+^docs$
+^agents\.MD$
