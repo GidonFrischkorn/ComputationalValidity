@@ -5,7 +5,9 @@
 library(osfr)
 
 osf_project <- osf_retrieve_node("6qnrv")
-osf_files   <- osf_ls_files(osf_project)
+osf_data    <- osf_ls_files(osf_project)
+osf_data    <- osf_data[osf_data$name == "data", ]
+osf_files   <- osf_ls_files(osf_data)
 
 if (!dir.exists("data")) dir.create("data")
 osf_download(osf_files, path = "data/", conflicts = "overwrite")

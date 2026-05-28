@@ -11,3 +11,5 @@
 ^local$
 ^docs$
 ^agents\.MD$
+^\.venv$
+^data$
