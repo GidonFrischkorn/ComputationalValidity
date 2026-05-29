@@ -2,6 +2,10 @@
 rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
 
+# Load package from source so data() resolves against local data/ folder
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+devtools::load_all(".")
+
 # use relative paths to load & save data
 pacman::p_load(here,tidytable,data.table, ggplot2)
 

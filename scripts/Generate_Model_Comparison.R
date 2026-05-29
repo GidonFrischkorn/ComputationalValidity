@@ -9,7 +9,11 @@
 rm(list = ls())
 graphics.off()
 
-pacman::p_load(here, tidytable, data.table, ggplot2, 
+# Load package from source so data() resolves against local data/ folder
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+devtools::load_all(".")
+
+pacman::p_load(here, tidytable, data.table, ggplot2,
                patchwork, scales, viridis)
 
 # Define clean theme

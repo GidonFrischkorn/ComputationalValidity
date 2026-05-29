@@ -14,6 +14,10 @@
 rm(list = ls())
 graphics.off()
 
+# Load package from source so data() resolves against local data/ folder
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+devtools::load_all(".")
+
 pacman::p_load(here, data.table, tidytable, ggplot2, patchwork, ComputationalValidity)
 
 # ── Color palette (consistent with existing manuscript figures) ───────────────
