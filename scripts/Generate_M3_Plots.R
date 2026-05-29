@@ -5,6 +5,10 @@
 # - Generality of validity arguments beyond conflict tasks to working memory
 # - Same four phenomena: equifinality, reliability paradox, correlation transfer
 # - No intermediate modeling figure (no EZ-DM equivalent for M3)
+#
+# NOTE: M3 data files are not on OSF. Before running this script, generate
+# them locally by running Simulation_M3_Recovery.R, Simulation_M3_Correlation.R,
+# SaveData_M3_Recovery.R, and SaveData_M3_Correlation.R.
 # =============================================================================
 
 # Setup ------------------------------------------------------------------------

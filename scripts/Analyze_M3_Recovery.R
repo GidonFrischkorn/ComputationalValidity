@@ -1,3 +1,6 @@
+# NOTE: M3 data files are not on OSF. Before running this script, generate them
+# locally by running Simulation_M3_Recovery.R then SaveData_M3_Recovery.R.
+
 # start fresh
 rm(list = ls())   # clean up work space
 graphics.off()  # switch off graphics device
