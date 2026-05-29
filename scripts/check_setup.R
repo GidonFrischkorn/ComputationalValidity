@@ -60,10 +60,9 @@ manuscript_files <- c(
 )
 ms_present <- file.exists(file.path(here("data"), manuscript_files))
 if (!all(ms_present)) {
-  missing_ms <- paste(manuscript_files[!ms_present], collapse = ", ")
   fails <- c(fails, paste0(
-    "[FAIL] Missing manuscript data files: ", missing_ms, "\n",
-    "       FIX: Run scripts/download_data.R"
+    "[FAIL] ", sum(!ms_present), " manuscript data file(s) missing.\n",
+    "       FIX: source('scripts/download_data.R')"
   ))
 }
 
