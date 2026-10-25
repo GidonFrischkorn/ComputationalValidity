@@ -8,9 +8,11 @@ library(tidytable)
 library(data.table)
 library(usethis)
 
-load(here("output","res_SSP_recovery.rds"))
+# Results of the 2026-10-20 re-run ("relfix"; see local/R1_relfix_check.md).
+# Pre-revision results: output/Simulation_SSP_Recovery/, res_SSP_recovery.rds.
+load(here("output","res_SSP_recovery_relfix.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res,prefix = "SSP_Recovery_Cond", wd = here("output"))
+allResults <- SimResults(res, prefix = "SSP_Recovery_relfix_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
 for (c in 1:length(allResults)) {

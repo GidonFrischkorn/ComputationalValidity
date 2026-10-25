@@ -9,9 +9,11 @@ library(data.table)
 library(usethis)
 library(ggplot2)
 
-load(here("output","res_DMC_correlation.rds"))
+# Results of the 2026-10-20 re-run ("relfix"; see local/R1_relfix_check.md).
+# Pre-revision results: output/Simulation_DMC_Correlations/, res_DMC_correlation.rds.
+load(here("output","res_DMC_correlation_relfix.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res, prefix = "DMC_Correlation_Cond", wd = here("output"))
+allResults <- SimResults(res, prefix = "DMC_Correlation_relfix_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
 for (c in 1:length(allResults)) {

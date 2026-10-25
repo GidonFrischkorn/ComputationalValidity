@@ -14,15 +14,21 @@ Design <- createDesign(
 dmc_model <- dRiftDM::dmc_dm(var_non_dec = FALSE, var_start = FALSE)
 print(dmc_model)
 
-# set parameter limits
+# set parameter limits for the five varying parameters.
+# simulate_data_dmc() passes only these to dRiftDM::simulate_data(); the gamma
+# shape parameter `a` keeps the dRiftDM default (2). An earlier version of this
+# script carried a sixth row (a = 0, 0) that was never used.
+# Ranges follow White, Servant & Logan (2018, Table 2) after conversion to
+# dRiftDM units; the amplitude range (.015-.400) is wider than theirs
+# (.119-.316). These are the limits that produced the package datasets.
 par_limits = data.frame(
   t(
-    rbind(c(1.5, .4, 0.15, 0.02,0, 0.015),
-          c(4.0, .8, 0.50, 0.12,0, 0.400))
+    rbind(c(1.5, .4, 0.15, 0.02, 0.015),
+          c(4.0, .8, 0.50, 0.12, 0.400))
   )
 )
 colnames(par_limits) <- c("min", "max")
-rownames(par_limits) <- colnames(dmc_model$flex_prms_obj$prms_matrix)
+rownames(par_limits) <- c("muc", "b", "non_dec", "tau", "A")
 
 # Specify functions for generating & analyzing the data
 Generate <- function(condition, fixed_objects = NULL) {

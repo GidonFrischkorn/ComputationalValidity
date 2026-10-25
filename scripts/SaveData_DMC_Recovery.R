@@ -8,9 +8,13 @@ library(tidytable)
 library(data.table)
 library(usethis)
 
-load(here("output","res_DMC_recovery.rds"))
+# Results of the 2026-10-20 re-run ("relfix": corrected split-half reliability,
+# original parameter ranges, fixed seeds, trial-level data stored; see
+# local/R1_relfix_check.md). The pre-revision results live in
+# output/Simulation_DMC_Recovery/ and output/res_DMC_recovery.rds.
+load(here("output","res_DMC_recovery_relfix.rds"))
 nReplications <- unique(res$REPLICATIONS)
-allResults <- SimResults(res, prefix = "DMC_Recovery_Cond", wd = here("output"))
+allResults <- SimResults(res, prefix = "DMC_Recovery_relfix_Cond", wd = here("output"))
 
 # 1) collect all results ---------------
 for (c in 1:length(allResults)) {
@@ -32,28 +36,11 @@ for (c in 1:length(allResults)) {
   df_recovery$SampleSize <- condition$sample_size
   df_recovery$nTrials <- condition$nTrials
   
-  # Calculate AUC from A and tau for DMC
-  # AUC recovery is computed from the average of A and tau recovery
-  # This is a composite measure of total automatic activation
-  df_auc <- df_recovery %>%
-    filter(genPar %in% c("A", "tau")) %>%
-    group_by(nRep, SampleSize, nTrials, measure, indicator, task) %>%
-    summarize(
-      rec = mean(rec, na.rm = TRUE),
-      rec_corrected = mean(rec_corrected, na.rm = TRUE),
-      UCL = mean(UCL, na.rm = TRUE),
-      LCL = mean(LCL, na.rm = TRUE),
-      UCL_corrected = mean(UCL_corrected, na.rm = TRUE),
-      LCL_corrected = mean(LCL_corrected, na.rm = TRUE),
-      N = first(N),
-      .groups = "drop"
-    ) %>%
-    mutate(genPar = "AUC")
-  
-  # Keep A and tau, add AUC as additional parameter
-  # This allows plotting A/tau separately while keeping AUC for potential future use
-  df_recovery <- df_recovery %>%
-    bind_rows(df_auc)
+  # AUC = 2 * A * tau (area under the automatic-activation curve) is now a
+  # generating parameter in analyze_data(), so df_recovery already holds its
+  # true recovery correlation. Earlier versions of this script approximated it
+  # by the mean of the A and tau recoveries; that stand-in is gone.
+  stopifnot("AUC" %in% df_recovery$genPar)
 
   # collect the recoveries in one data frame
   df_behavior <- do.call(rbind,
@@ -157,7 +144,7 @@ dmc_recovery_reliability$nTrials <- factor(dmc_recovery_reliability$nTrials,
                                     levels = c("50","100","200"))
 
 # Recovery of DMC parameters
-# Keep A, tau, and AUC as separate parameters (AUC computed from mean of A and tau)
+# Keep A, tau, and AUC as separate parameters (AUC = 2 * A * tau, true recovery correlation)
 dmc_recovery_parRecovery$genPar <- factor(dmc_recovery_parRecovery$genPar,
                                           levels = c("A","tau","AUC","muc","b","non_dec","sd_non_dec","alpha"))
 

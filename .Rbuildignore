@@ -13,3 +13,4 @@
 ^agents\.MD$
 ^\.venv$
 ^data$
+^\.vscode$
